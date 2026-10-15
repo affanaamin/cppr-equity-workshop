@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>CPPR Equity Budgeting Workshop — Interactive Worksheets</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+</head>
+<body>
+
+  <!-- VIEW 1: SINGLE-LINE LOGIN SCREEN -->
+  <div id="login-view" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-brand">📋</div>
+      <h1 class="login-title">CPPR EQUITY BUDGETING WORKSHOP</h1>
+      <p class="login-subtitle">Participant Digital Laboratory & Interactive Worksheet</p>
+      
+      <form id="login-form" class="login-form" onsubmit="handleLoginSubmit(event)">
+        <div class="login-input-group">
+          <input 
+            type="text" 
+            id="sector-input" 
+            class="login-input" 
+            placeholder='Type "health", "finance", "education", or "local"'
+            autocomplete="off" 
+            autofocus
+            spellcheck="false"
+          >
+          <button type="submit" class="login-btn" title="Open Worksheet">➔</button>
+        </div>
+      </form>
+      
+      <p class="login-hint">Enter your assigned departmental code above to begin your workshop session.</p>
+
+      <div class="login-pills">
+        <button type="button" class="quick-pill" onclick="quickSelectSector('health')">🏥 Health</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('local')">🏛️ Local Government</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('education')">🎓 Education</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('finance')">💼 Finance & Planning</button>
+        <button type="button" class="quick-pill" style="background:#fef3c7; color:#92400e; border-color:#fde68a;" onclick="quickSelectSector('admin')">⚡ Facilitator Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 2: PARTICIPANT WORKSHEET VIEW -->
+  <div id="worksheet-view" style="display: none; flex-direction: column; min-height: 100vh;">
+    <!-- App Navigation Header -->
+    <header class="app-header">
+      <div class="container header-inner">
+        <div class="brand-section">
+          <span class="brand-badge">CPPR</span>
+          <div class="brand-text">
+            <h1>EQUITY BUDGETING WORKSHOP</h1>
+            <p id="top-sector-name">Team Worksheet</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div id="sync-status" class="sync-badge">
+            <span class="sync-dot"></span>
+            <span id="sync-text">Auto-Saved</span>
+          </div>
+          <button class="btn-sm" onclick="logoutSector()" title="Exit or Switch Sector">🚪 Switch Sector</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sector Details Banner -->
+    <section class="team-banner">
+      <div class="container">
+        <div class="team-banner-card">
+          <div class="sector-meta">
+            <h2 id="banner-team-name">Team 1: Health Sector Focus</h2>
+            <p id="banner-scope">Departmental Scope: Health</p>
+          </div>
+          <div class="table-input-box">
+            <label for="table-num">Assigned Table #:</label>
+            <input type="text" id="table-num" class="table-input" placeholder="Table # 1" oninput="handleTableNumChange()">
+          </div>
+        </div>
+        
+        <!-- Live Progress Meter -->
+        <div class="progress-container">
+          <div class="progress-labels">
+            <span>Evaluation Progress</span>
+            <span id="progress-text">0 / 14 Completed (0%)</span>
+          </div>
+          <div class="progress-track">
+            <div id="progress-bar" class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="container" style="flex: 1; padding-top: 1.25rem; padding-bottom: 5rem;">
+      <!-- Navigation Tabs -->
+      <nav class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('cards')">📝 14 Evaluation Cards</button>
+        <button class="tab-btn" onclick="switchTab('pdfs')">📁 Budget PDFs & Downloads</button>
+        <button class="tab-btn" onclick="switchTab('workflow')">📋 Analytical Workflow</button>
+        <button class="tab-btn" onclick="switchTab('rubric')">📖 Equity Rubric Guide</button>
+      </nav>
+
+      <!-- TAB 1: 14 EVALUATION CARDS -->
+      <section id="tab-cards">
+        <!-- Quick Jump Navigation Bar -->
+        <div class="quick-jump-bar" id="quick-jump-container">
+          <!-- Dynamically populated with pills: A5, B1, B2... -->
+        </div>
+
+        <!-- 14 Indicator Cards Container -->
+        <div id="cards-container">
+          <!-- Dynamically populated by app.js -->
+        </div>
+      </section>
+
+      <!-- TAB 2: BUDGET PDFS & DOWNLOADS -->
+      <section id="tab-pdfs" style="display: none;">
+        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 0.85rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="color: var(--primary-navy); font-size: 1.05rem; font-weight: 800;">Assigned Budget Documents Catalog</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Direct high-speed downloads from the local workshop server and Google Drive links.</p>
+          </div>
+          <button class="btn-sm" style="background: var(--primary-navy); color: #ffffff;" onclick="setCustomDriveFolder()">🔗 Set Google Drive Folder Link</button>
+        </div>
+        <div class="catalog-grid" id="catalog-container">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 3: ANALYTICAL WORKFLOW -->
+      <section id="tab-workflow" style="display: none;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary-navy); margin-bottom: 1rem;">Participant Step-by-Step Analytical Workflow</h3>
+        <div class="data-table-wrapper">
+          <table class="data-table" id="workflow-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Workflow Stage</th>
+                <th style="width: 75%;">Action Required by Workshop Participants</th>
+              </tr>
+            </thead>
+            <tbody id="workflow-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 4: EQUITY RUBRIC GUIDE -->
+      <section id="tab-rubric" style="display: none;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary-navy); margin-bottom: 1rem;">Equity Dimensions Evaluation Rubric</h3>
+        <div class="data-table-wrapper">
+          <table class="data-table" id="rubric-table">
+            <thead>
+              <tr>
+                <th style="width: 20%;">Equity Dimension</th>
+                <th style="width: 65%;">Operational Definition & Sectoral Markers</th>
+                <th style="width: 15%; text-align: center;">Allowed Values</th>
+              </tr>
+            </thead>
+            <tbody id="rubric-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Sticky Bottom Action Bar -->
+    <div class="sticky-footer-bar">
+      <div class="container footer-inner">
+        <div>
+          <span style="font-weight: 700; color: var(--primary-navy); font-size: 0.9rem;" id="footer-summary-text">0 / 14 Completed</span>
+          <span style="color: var(--text-muted); font-size: 0.825rem; margin-left: 0.5rem;" id="footer-save-time">Last saved: Just now</span>
+        </div>
+        <div class="footer-btns">
+          <button class="btn-sm" style="background:#f1f5f9; font-weight:700;" onclick="exportResponses('xlsx')" title="Download your completed Excel file">📥 Download Excel</button>
+          <button class="btn-sm" style="background:#f1f5f9; font-weight:700;" onclick="exportResponses('docx')" title="Download your completed Word document">📄 Download Word</button>
+          <button class="btn-sm" style="background:#e0f2fe; color:#0369a1; font-weight:700;" onclick="emailResponses()" title="Email completed worksheet directly to Facilitator">📧 Email Facilitator</button>
+          <button class="btn-success" onclick="submitResponses(true)" title="Submit complete worksheet to facilitator">📤 Submit to Facilitator</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: FACILITATOR REAL-TIME DASHBOARD -->
+  <div id="admin-view" style="display: none; flex-direction: column; min-height: 100vh;">
+    <header class="app-header">
+      <div class="container header-inner">
+        <div class="brand-section">
+          <span class="brand-badge" style="background: #92400e;">FACILITATOR</span>
+          <div class="brand-text">
+            <h1>LIVE WORKSHOP MONITOR</h1>
+            <p>Real-Time Participant Submission Tracker & Synthesis Desk</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-sm" onclick="refreshAdminData()">🔄 Refresh</button>
+          <button class="btn-sm" onclick="logoutSector()">🚪 Exit Monitor</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container" style="flex: 1; padding-top: 1.5rem; padding-bottom: 3rem;">
+      <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--primary-navy); margin-bottom: 1rem;">Departmental Teams Status Overview</h2>
+      
+      <div class="admin-grid" id="admin-teams-grid">
+        <!-- Dynamically populated for Health, Local Gov, Education, Finance -->
+      </div>
+
+      <div style="background: #ffffff; border: 1.5px solid var(--border-card); border-radius: 1rem; padding: 1.5rem; margin-top: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--primary-navy);">Cross-Team Comparative Synthesis View</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Compare responses across all four teams for any indicator in real-time.</p>
+          </div>
+          <select id="admin-indicator-select" class="form-select" style="max-width: 320px;" onchange="renderAdminComparison()">
+            <!-- Populated with A5 to E3 -->
+          </select>
+        </div>
+
+        <div id="admin-comparison-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <!-- Dynamically populated with all 4 teams side-by-side -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toast" class="toast-notice">Notice</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

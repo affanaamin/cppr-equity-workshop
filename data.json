@@ -1,0 +1,1595 @@
+{
+  "title": "CPPR EQUITY BUDGETING WORKSHOP",
+  "subtitle": "Participant Digital Laboratory & Interactive Worksheet",
+  "sectors": {
+    "health": {
+      "code": "health",
+      "assigned_team": "Team 1: Health Sector Focus",
+      "scope": "Health",
+      "display_title": "Team 1: Health Sector Focus",
+      "short_name": "Health",
+      "color": "emerald",
+      "workflow": [
+        {
+          "stage": "Step 1: Understand Framework Question",
+          "action": "Read the indicator definition, budget stage, and note the prescribed source document types."
+        },
+        {
+          "stage": "Step 2: Inspect Assigned Budget PDFs",
+          "action": "Open the corresponding PDF file from your departmental documents. Use search keywords (e.g., 'maternal', 'merged areas', 'stipend', 'PFC', 'handicapped', 'minority')."
+        },
+        {
+          "stage": "Step 3: Document Dual Page References",
+          "action": "Record BOTH the printed book page number (visible on the footer/header) AND the PDF viewer digital index page."
+        },
+        {
+          "stage": "Step 4: Transcribe Verbatim Evidence",
+          "action": "Transcribe the exact quoted sentence or budget table row, including exact monetary figures in PKR (Millions or Billions)."
+        },
+        {
+          "stage": "Step 5: Tag Marginalized Dimensions",
+          "action": "Check each applicable dimension box (Gender, Age, Ethnicity/Merged, Religion, Disability, Culture)."
+        },
+        {
+          "stage": "Step 6: Determine Overall Status & Synthesis",
+          "action": "Assess status: [ ] YES (evidence found), [ ] NO (no evidence found), [ ] PARTIAL (marginal/ad-hoc mention), and write your team's rationale."
+        }
+      ],
+      "rubric": [
+        {
+          "dimension": "Gender",
+          "definition": "Programs, targets, or allocations addressing women and girls. Includes maternal healthcare, girls schooling stipends, female teachers/LHVs, women councilor quotas, gender-segregated transport (Pink Buses), and women empowerment centers.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Age",
+          "definition": "Initiatives specifically targeting vulnerable age cohorts: infants and young children (immunization, neo-natal care, malnutrition), youth (skills challenge programs, higher education vouchers, startup funds), and senior citizens (geriatric care, pension protection).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Ethnicity / Regional Parity",
+          "definition": "Interventions addressing historical regional deficits, backwardness, or marginalized geographies: specifically Newly Merged Areas (ex-FATA, Demand 60/61, AIP grants) and remote backward districts (Torghar, Kohistan, Upper Chitral).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Religion / Minorities",
+          "definition": "Allocations and policies safeguarding religious minority communities (Christians, Sikhs, Hindus): minority welfare grants, security/repair of minority places of worship, scholarships for non-Muslim students, Auqaf allocations.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Physical Disability",
+          "definition": "Targeted support for persons with disabilities (PWDs): special education institutions, accessible public infrastructure/transport, assistive devices, rehabilitation centers, and disability employment quotas.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Culture",
+          "definition": "Preservation and promotion of cultural heritage of indigenous or marginalized groups: museum construction, folk heritage preservation, community cultural endowment funds.",
+          "allowed": "YES / NO / N/A"
+        }
+      ],
+      "catalog": [
+        {
+          "filename": "BESD_2019-22_Output_Based_Health.pdf",
+          "title": "Medium Term Budget Estimates for Service Delivery (BESD) 2019-22",
+          "fy": "2019-20 to 2021-22",
+          "filesize": "1.37 MB",
+          "authority": "Finance & Health Depts",
+          "content": "Health Sector Vision, KPIs, Child Immunization (95% Penta-I coverage doc p. 27 / PDF viewer p. 31), Maternal Health, 24/7 BHUs",
+          "download_url": "files/health/BESD_2019-22_Output_Based_Health.pdf"
+        },
+        {
+          "filename": "White_Paper_2019-20.pdf",
+          "title": "One Khyber Pakhtunkhwa Budget 2019-20 White Paper",
+          "fy": "2019-20",
+          "filesize": "0.99 MB",
+          "authority": "Finance Department",
+          "content": "Current/Dev Health Spending, Merged Areas Transfers (Rs 5.3B footnote 11, doc p. 36 / PDF viewer p. 45), Vertical Programs",
+          "download_url": "files/health/White_Paper_2019-20.pdf"
+        },
+        {
+          "filename": "Audit_Report_GKPK_2023-24.pdf",
+          "title": "Audit Report of Auditor General of Pakistan on GKPK 2023-24",
+          "fy": "2023-24",
+          "filesize": "13.66 MB",
+          "authority": "Auditor General of Pakistan",
+          "content": "Chapter on DG Health Services, LHVs/Ayas HR (doc p. 194 / PDF viewer p. 235), C-Section Epidemic Investigation (doc p. 753 / PDF viewer p. 795)",
+          "download_url": "files/health/Audit_Report_GKPK_2023-24.pdf"
+        },
+        {
+          "filename": "Citizen_Budget_2024-25.pdf",
+          "title": "Citizen Budget 2024-25 (Simplified Graphical Guide)",
+          "fy": "2024-25",
+          "filesize": "1.89 MB",
+          "authority": "Finance Department",
+          "content": "Universal Sehat Card Plus Allocation (Rs 34.0B doc p. 22 / PDF viewer p. 23), Tertiary MTI Healthcare Spending (Rs 33.6B doc p. 23 / PDF viewer p. 24)",
+          "download_url": "files/health/Citizen_Budget_2024-25.pdf"
+        },
+        {
+          "filename": "Annual_Budget_Statement_2023-24.pdf",
+          "title": "Annual Budget Statement 2023-24",
+          "fy": "2023-24",
+          "filesize": "4.25 MB",
+          "authority": "Finance Department",
+          "content": "Demands for Grants: Demand 13 (Settled Health PDF viewer p. 61) and Demand 61 (Merged Areas Health PDF viewer p. 63)",
+          "download_url": "files/health/Annual_Budget_Statement_2023-24.pdf"
+        }
+      ],
+      "cards": [
+        {
+          "card_idx": 1,
+          "id": "A5",
+          "stage": "BUDGET PLANNING & CITIZEN PARTICIPATION",
+          "question": "Are CSOs representing the rights of the most marginalised involved in this stage of the process? Have the most marginalised been involved in the process?",
+          "prescribed_sources": "Citizen Budget, Annual Budget Statement, White Paper, BCC",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 2,
+          "id": "B1",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is equity clearly stated as an objective in budget formulation guidelines (i.e., budget call circulars)?",
+          "prescribed_sources": "Budget Call Circular (BCC), BESD, PBB, Budget Strategy Paper",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 3,
+          "id": "B2",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are line ministries' budgets prepared in line with sector objectives and performance indicators?",
+          "prescribed_sources": "Budget Estimates for Service Delivery (BESD), Performance Based Budget (PBB)",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 4,
+          "id": "B3",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is there information on equity considerations in the budget law and supporting documents presented to Parliament?",
+          "prescribed_sources": "White Paper, Annual Budget Statement (Demands for Grants), BESD",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 5,
+          "id": "B4",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is the budget documentation accessible to citizens?",
+          "prescribed_sources": "Citizen Budget (English/Urdu), Annual Budget Statement, Web Portals",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 6,
+          "id": "B5",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are programmes or projects systematically appraised with equity considerations? How are they selected for inclusion in the budget?",
+          "prescribed_sources": "Annual Development Programme (ADP), BESD, White Paper, PC-I Appraisal",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 7,
+          "id": "C1",
+          "stage": "BUDGET EXECUTION",
+          "question": "Is budget executed in line with the budget approved by parliament?",
+          "prescribed_sources": "Year-End Execution Report, Revised Estimates, Annual Receipts & Expenditure, Release Policy",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 8,
+          "id": "C2",
+          "stage": "BUDGET EXECUTION",
+          "question": "Are budget disbursements and execution recorded in the Government Financial Management Information system? What is their level of disaggregation?",
+          "prescribed_sources": "Chart of Accounts, IFMIS / SAP R3 (PIFRA), Monthly Civil Accounts, ABS",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 9,
+          "id": "C3",
+          "stage": "BUDGET EXECUTION",
+          "question": "Do in-year budget virements or supplementary budgets take equity into account? E.g. Do they protect expenditures to disadvantaged groups?",
+          "prescribed_sources": "Supplementary Budget Statement, Re-appropriation Orders, Release Rules",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 10,
+          "id": "D1",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Do financial and nonfinancial budget monitoring reports include equity measures? Are there equity budget performance indicators?",
+          "prescribed_sources": "BESD / PBB Output Indicators, Departmental KPIs, Health/Edu Information Systems",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 11,
+          "id": "D2",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Are there external evaluations and analysis on budget spending? Do they include equity indicators?",
+          "prescribed_sources": "Auditor General of Pakistan (AGP) Audit Reports, PEFA Assessments",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 12,
+          "id": "D3",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How do monitoring and evaluation reports inform future budget decisions? Are programmes cancelled or amended based on the results they have on disadvantaged groups?",
+          "prescribed_sources": "Audit Follow-up Reports, BESD / PBB Target Adjustments, Planning Feedback",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 13,
+          "id": "D5",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How is civil society involved in promoting budget transparency and performance?",
+          "prescribed_sources": "CSO Budget Tracking Reports (CPDI, I-SAPS), Social Audits, Public Hearings",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 14,
+          "id": "E3",
+          "stage": "BUDGET OUTCOMES",
+          "question": "Is the distribution of funds proportional to need and/or cost? E.g. are more resources directed to poorer areas, and remote areas where the unit cost of provision of public services is higher?",
+          "prescribed_sources": "PFC Award Horizontal Sharing Formula, District ADP, White Paper Transfer Tables",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        }
+      ]
+    },
+    "local": {
+      "code": "local",
+      "assigned_team": "Team 2: Local Government & Rural Development",
+      "scope": "Local Governance, Municipalities & PFC Transfers",
+      "display_title": "Team 2: Local Government & Rural Development",
+      "short_name": "Local Government",
+      "color": "blue",
+      "workflow": [
+        {
+          "stage": "Step 1: Understand Framework Question",
+          "action": "Read the indicator definition, budget stage, and note the prescribed source document types."
+        },
+        {
+          "stage": "Step 2: Inspect Assigned Budget PDFs",
+          "action": "Open the corresponding PDF file from your departmental documents. Use search keywords (e.g., 'maternal', 'merged areas', 'stipend', 'PFC', 'handicapped', 'minority')."
+        },
+        {
+          "stage": "Step 3: Document Dual Page References",
+          "action": "Record BOTH the printed book page number (visible on the footer/header) AND the PDF viewer digital index page."
+        },
+        {
+          "stage": "Step 4: Transcribe Verbatim Evidence",
+          "action": "Transcribe the exact quoted sentence or budget table row, including exact monetary figures in PKR (Millions or Billions)."
+        },
+        {
+          "stage": "Step 5: Tag Marginalized Dimensions",
+          "action": "Check each applicable dimension box (Gender, Age, Ethnicity/Merged, Religion, Disability, Culture)."
+        },
+        {
+          "stage": "Step 6: Determine Overall Status & Synthesis",
+          "action": "Assess status: [ ] YES (evidence found), [ ] NO (no evidence found), [ ] PARTIAL (marginal/ad-hoc mention), and write your team's rationale."
+        }
+      ],
+      "rubric": [
+        {
+          "dimension": "Gender",
+          "definition": "Programs, targets, or allocations addressing women and girls. Includes maternal healthcare, girls schooling stipends, female teachers/LHVs, women councilor quotas, gender-segregated transport (Pink Buses), and women empowerment centers.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Age",
+          "definition": "Initiatives specifically targeting vulnerable age cohorts: infants and young children (immunization, neo-natal care, malnutrition), youth (skills challenge programs, higher education vouchers, startup funds), and senior citizens (geriatric care, pension protection).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Ethnicity / Regional Parity",
+          "definition": "Interventions addressing historical regional deficits, backwardness, or marginalized geographies: specifically Newly Merged Areas (ex-FATA, Demand 60/61, AIP grants) and remote backward districts (Torghar, Kohistan, Upper Chitral).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Religion / Minorities",
+          "definition": "Allocations and policies safeguarding religious minority communities (Christians, Sikhs, Hindus): minority welfare grants, security/repair of minority places of worship, scholarships for non-Muslim students, Auqaf allocations.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Physical Disability",
+          "definition": "Targeted support for persons with disabilities (PWDs): special education institutions, accessible public infrastructure/transport, assistive devices, rehabilitation centers, and disability employment quotas.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Culture",
+          "definition": "Preservation and promotion of cultural heritage of indigenous or marginalized groups: museum construction, folk heritage preservation, community cultural endowment funds.",
+          "allowed": "YES / NO / N/A"
+        }
+      ],
+      "catalog": [
+        {
+          "filename": "BESD_2018-21_Local_Government.pdf",
+          "title": "Budget Estimates for Service Delivery 2018-21",
+          "fy": "2018-19 to 2020-21",
+          "filesize": "2.08 MB",
+          "authority": "Finance & LG&RDD",
+          "content": "Local Govt Chapter, Pink Buses for Women (doc p. 143 / PDF viewer p. 147), Municipal Infrastructure, Solid Waste KPIs",
+          "download_url": "files/local/BESD_2018-21_Local_Government.pdf"
+        },
+        {
+          "filename": "White_Paper_2017-18.pdf",
+          "title": "White Paper 2017-18",
+          "fy": "2017-18",
+          "filesize": "1.88 MB",
+          "authority": "Finance Department",
+          "content": "Local Govt Staff & Elected Rep Training (664 staff incl. 44 Female Reps doc p. 41 / PDF viewer p. 51), LGA 2013 Devolution",
+          "download_url": "files/local/White_Paper_2017-18.pdf"
+        },
+        {
+          "filename": "White_Paper_2019-20.pdf",
+          "title": "One Khyber Pakhtunkhwa Budget 2019-20 White Paper",
+          "fy": "2019-20",
+          "filesize": "0.99 MB",
+          "authority": "Finance Department",
+          "content": "Table 16 (doc p. 27 / PDF viewer p. 36): Merged Areas Local Governments Share in Current Revenue Expenditure (Rs 27.9B)",
+          "download_url": "files/local/White_Paper_2019-20.pdf"
+        },
+        {
+          "filename": "Performance_Based_Budget_2024-25.pdf",
+          "title": "Performance Based Budget 2024-25",
+          "fy": "2024-25",
+          "filesize": "1.57 MB",
+          "authority": "Finance & LG&RDD",
+          "content": "Priority 1: Strengthening Local Govt in Newly Merged Areas (doc p. 124 / PDF viewer p. 126), Municipal Service Outcomes",
+          "download_url": "files/local/Performance_Based_Budget_2024-25.pdf"
+        },
+        {
+          "filename": "Provincial_Finance_Commission_Award_2023-24.pdf",
+          "title": "Provincial Finance Commission Award 2023-24",
+          "fy": "2023-24",
+          "filesize": "3.42 MB",
+          "authority": "Provincial Finance Commission",
+          "content": "PFC Resource Sharing Formula, Grants to Local Councils / VCs / NCs (Rs 3.306B doc p. 19 / PDF viewer p. 12), Poverty Weights",
+          "download_url": "files/local/Provincial_Finance_Commission_Award_2023-24.pdf"
+        },
+        {
+          "filename": "Audit_Report_GKPK_2023-24.pdf",
+          "title": "Audit Report on GKPK 2023-24",
+          "fy": "2023-24",
+          "filesize": "13.66 MB",
+          "authority": "Auditor General of Pakistan",
+          "content": "Chapter 21: Local Government Elections & Rural Development Department Audits (doc p. 527-537 / PDF viewer p. 568-578)",
+          "download_url": "files/local/Audit_Report_GKPK_2023-24.pdf"
+        }
+      ],
+      "cards": [
+        {
+          "card_idx": 1,
+          "id": "A5",
+          "stage": "BUDGET PLANNING & CITIZEN PARTICIPATION",
+          "question": "Are CSOs representing the rights of the most marginalised involved in this stage of the process? Have the most marginalised been involved in the process?",
+          "prescribed_sources": "Citizen Budget, Annual Budget Statement, White Paper, BCC",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 2,
+          "id": "B1",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is equity clearly stated as an objective in budget formulation guidelines (i.e., budget call circulars)?",
+          "prescribed_sources": "Budget Call Circular (BCC), BESD, PBB, Budget Strategy Paper",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 3,
+          "id": "B2",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are line ministries' budgets prepared in line with sector objectives and performance indicators?",
+          "prescribed_sources": "Budget Estimates for Service Delivery (BESD), Performance Based Budget (PBB)",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 4,
+          "id": "B3",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is there information on equity considerations in the budget law and supporting documents presented to Parliament?",
+          "prescribed_sources": "White Paper, Annual Budget Statement (Demands for Grants), BESD",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 5,
+          "id": "B4",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is the budget documentation accessible to citizens?",
+          "prescribed_sources": "Citizen Budget (English/Urdu), Annual Budget Statement, Web Portals",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 6,
+          "id": "B5",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are programmes or projects systematically appraised with equity considerations? How are they selected for inclusion in the budget?",
+          "prescribed_sources": "Annual Development Programme (ADP), BESD, White Paper, PC-I Appraisal",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 7,
+          "id": "C1",
+          "stage": "BUDGET EXECUTION",
+          "question": "Is budget executed in line with the budget approved by parliament?",
+          "prescribed_sources": "Year-End Execution Report, Revised Estimates, Annual Receipts & Expenditure, Release Policy",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 8,
+          "id": "C2",
+          "stage": "BUDGET EXECUTION",
+          "question": "Are budget disbursements and execution recorded in the Government Financial Management Information system? What is their level of disaggregation?",
+          "prescribed_sources": "Chart of Accounts, IFMIS / SAP R3 (PIFRA), Monthly Civil Accounts, ABS",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 9,
+          "id": "C3",
+          "stage": "BUDGET EXECUTION",
+          "question": "Do in-year budget virements or supplementary budgets take equity into account? E.g. Do they protect expenditures to disadvantaged groups?",
+          "prescribed_sources": "Supplementary Budget Statement, Re-appropriation Orders, Release Rules",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 10,
+          "id": "D1",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Do financial and nonfinancial budget monitoring reports include equity measures? Are there equity budget performance indicators?",
+          "prescribed_sources": "BESD / PBB Output Indicators, Departmental KPIs, Health/Edu Information Systems",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 11,
+          "id": "D2",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Are there external evaluations and analysis on budget spending? Do they include equity indicators?",
+          "prescribed_sources": "Auditor General of Pakistan (AGP) Audit Reports, PEFA Assessments",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 12,
+          "id": "D3",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How do monitoring and evaluation reports inform future budget decisions? Are programmes cancelled or amended based on the results they have on disadvantaged groups?",
+          "prescribed_sources": "Audit Follow-up Reports, BESD / PBB Target Adjustments, Planning Feedback",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 13,
+          "id": "D5",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How is civil society involved in promoting budget transparency and performance?",
+          "prescribed_sources": "CSO Budget Tracking Reports (CPDI, I-SAPS), Social Audits, Public Hearings",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 14,
+          "id": "E3",
+          "stage": "BUDGET OUTCOMES",
+          "question": "Is the distribution of funds proportional to need and/or cost? E.g. are more resources directed to poorer areas, and remote areas where the unit cost of provision of public services is higher?",
+          "prescribed_sources": "PFC Award Horizontal Sharing Formula, District ADP, White Paper Transfer Tables",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        }
+      ]
+    },
+    "education": {
+      "code": "education",
+      "assigned_team": "Team 3: Elementary & Secondary Education",
+      "scope": "Elementary & Secondary Education",
+      "display_title": "Team 3: Elementary & Secondary Education",
+      "short_name": "Education",
+      "color": "amber",
+      "workflow": [
+        {
+          "stage": "Step 1: Understand Framework Question",
+          "action": "Read the indicator definition, budget stage, and note the prescribed source document types."
+        },
+        {
+          "stage": "Step 2: Inspect Assigned Budget PDFs",
+          "action": "Open the corresponding PDF file from your departmental documents. Use search keywords (e.g., 'maternal', 'merged areas', 'stipend', 'PFC', 'handicapped', 'minority')."
+        },
+        {
+          "stage": "Step 3: Document Dual Page References",
+          "action": "Record BOTH the printed book page number (visible on the footer/header) AND the PDF viewer digital index page."
+        },
+        {
+          "stage": "Step 4: Transcribe Verbatim Evidence",
+          "action": "Transcribe the exact quoted sentence or budget table row, including exact monetary figures in PKR (Millions or Billions)."
+        },
+        {
+          "stage": "Step 5: Tag Marginalized Dimensions",
+          "action": "Check each applicable dimension box (Gender, Age, Ethnicity/Merged, Religion, Disability, Culture)."
+        },
+        {
+          "stage": "Step 6: Determine Overall Status & Synthesis",
+          "action": "Assess status: [ ] YES (evidence found), [ ] NO (no evidence found), [ ] PARTIAL (marginal/ad-hoc mention), and write your team's rationale."
+        }
+      ],
+      "rubric": [
+        {
+          "dimension": "Gender",
+          "definition": "Programs, targets, or allocations addressing women and girls. Includes maternal healthcare, girls schooling stipends, female teachers/LHVs, women councilor quotas, gender-segregated transport (Pink Buses), and women empowerment centers.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Age",
+          "definition": "Initiatives specifically targeting vulnerable age cohorts: infants and young children (immunization, neo-natal care, malnutrition), youth (skills challenge programs, higher education vouchers, startup funds), and senior citizens (geriatric care, pension protection).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Ethnicity / Regional Parity",
+          "definition": "Interventions addressing historical regional deficits, backwardness, or marginalized geographies: specifically Newly Merged Areas (ex-FATA, Demand 60/61, AIP grants) and remote backward districts (Torghar, Kohistan, Upper Chitral).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Religion / Minorities",
+          "definition": "Allocations and policies safeguarding religious minority communities (Christians, Sikhs, Hindus): minority welfare grants, security/repair of minority places of worship, scholarships for non-Muslim students, Auqaf allocations.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Physical Disability",
+          "definition": "Targeted support for persons with disabilities (PWDs): special education institutions, accessible public infrastructure/transport, assistive devices, rehabilitation centers, and disability employment quotas.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Culture",
+          "definition": "Preservation and promotion of cultural heritage of indigenous or marginalized groups: museum construction, folk heritage preservation, community cultural endowment funds.",
+          "allowed": "YES / NO / N/A"
+        }
+      ],
+      "catalog": [
+        {
+          "filename": "BESD_2016-19_Education.pdf",
+          "title": "Budget Estimates for Service Delivery 2016-19",
+          "fy": "2016-17 to 2018-19",
+          "filesize": "35.35 MB",
+          "authority": "Finance & E&SED",
+          "content": "Education Chapter, Stipends for Girl Students & Missing Facilities (doc p. 16 / PDF viewer p. 23), Hard Area Allowance",
+          "download_url": "files/education/BESD_2016-19_Education.pdf"
+        },
+        {
+          "filename": "White_Paper_2018-19.pdf",
+          "title": "White Paper 2018-19",
+          "fy": "2018-19",
+          "filesize": "1.61 MB",
+          "authority": "Finance Department",
+          "content": "Social Services Chapter (doc p. 16 / PDF viewer p. 25), Elementary & Secondary Education Current & Dev Estimates (Rs 22.7B)",
+          "download_url": "files/education/White_Paper_2018-19.pdf"
+        },
+        {
+          "filename": "Citizen_Budget_2018-19.pdf",
+          "title": "Citizen Budget 2018-19",
+          "fy": "2018-19",
+          "filesize": "1.98 MB",
+          "authority": "Finance Department",
+          "content": "Rs 9.6B for Missing Facilities, Independent Monitoring Unit (IMU), 200 Maktab School Conversions (doc/PDF viewer p. 19)",
+          "download_url": "files/education/Citizen_Budget_2018-19.pdf"
+        },
+        {
+          "filename": "Revised_Estimates_Education_2018-19.pdf",
+          "title": "Revised Estimates Elementary & Secondary Education 2018-19",
+          "fy": "2018-19",
+          "filesize": "1.02 MB",
+          "authority": "Finance Department",
+          "content": "District-by-District Disaggregated Budget & Revised Estimates NC21073 (046) (doc/PDF viewer p. 1)",
+          "download_url": "files/education/Revised_Estimates_Education_2018-19.pdf"
+        },
+        {
+          "filename": "Audit_Report_GKPK_2016-17.pdf",
+          "title": "Audit Report on GKPK 2016-17",
+          "fy": "2016-17",
+          "filesize": "4.15 MB",
+          "authority": "Auditor General of Pakistan",
+          "content": "Chapter 5: Education Department, Audits of 100 Male & Female Schools Across 25 Districts (doc p. 73 / PDF viewer p. 100)",
+          "download_url": "files/education/Audit_Report_GKPK_2016-17.pdf"
+        }
+      ],
+      "cards": [
+        {
+          "card_idx": 1,
+          "id": "A5",
+          "stage": "BUDGET PLANNING & CITIZEN PARTICIPATION",
+          "question": "Are CSOs representing the rights of the most marginalised involved in this stage of the process? Have the most marginalised been involved in the process?",
+          "prescribed_sources": "Citizen Budget, Annual Budget Statement, White Paper, BCC",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 2,
+          "id": "B1",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is equity clearly stated as an objective in budget formulation guidelines (i.e., budget call circulars)?",
+          "prescribed_sources": "Budget Call Circular (BCC), BESD, PBB, Budget Strategy Paper",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 3,
+          "id": "B2",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are line ministries' budgets prepared in line with sector objectives and performance indicators?",
+          "prescribed_sources": "Budget Estimates for Service Delivery (BESD), Performance Based Budget (PBB)",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 4,
+          "id": "B3",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is there information on equity considerations in the budget law and supporting documents presented to Parliament?",
+          "prescribed_sources": "White Paper, Annual Budget Statement (Demands for Grants), BESD",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 5,
+          "id": "B4",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is the budget documentation accessible to citizens?",
+          "prescribed_sources": "Citizen Budget (English/Urdu), Annual Budget Statement, Web Portals",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 6,
+          "id": "B5",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are programmes or projects systematically appraised with equity considerations? How are they selected for inclusion in the budget?",
+          "prescribed_sources": "Annual Development Programme (ADP), BESD, White Paper, PC-I Appraisal",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 7,
+          "id": "C1",
+          "stage": "BUDGET EXECUTION",
+          "question": "Is budget executed in line with the budget approved by parliament?",
+          "prescribed_sources": "Year-End Execution Report, Revised Estimates, Annual Receipts & Expenditure, Release Policy",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 8,
+          "id": "C2",
+          "stage": "BUDGET EXECUTION",
+          "question": "Are budget disbursements and execution recorded in the Government Financial Management Information system? What is their level of disaggregation?",
+          "prescribed_sources": "Chart of Accounts, IFMIS / SAP R3 (PIFRA), Monthly Civil Accounts, ABS",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 9,
+          "id": "C3",
+          "stage": "BUDGET EXECUTION",
+          "question": "Do in-year budget virements or supplementary budgets take equity into account? E.g. Do they protect expenditures to disadvantaged groups?",
+          "prescribed_sources": "Supplementary Budget Statement, Re-appropriation Orders, Release Rules",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 10,
+          "id": "D1",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Do financial and nonfinancial budget monitoring reports include equity measures? Are there equity budget performance indicators?",
+          "prescribed_sources": "BESD / PBB Output Indicators, Departmental KPIs, Health/Edu Information Systems",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 11,
+          "id": "D2",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Are there external evaluations and analysis on budget spending? Do they include equity indicators?",
+          "prescribed_sources": "Auditor General of Pakistan (AGP) Audit Reports, PEFA Assessments",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 12,
+          "id": "D3",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How do monitoring and evaluation reports inform future budget decisions? Are programmes cancelled or amended based on the results they have on disadvantaged groups?",
+          "prescribed_sources": "Audit Follow-up Reports, BESD / PBB Target Adjustments, Planning Feedback",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 13,
+          "id": "D5",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How is civil society involved in promoting budget transparency and performance?",
+          "prescribed_sources": "CSO Budget Tracking Reports (CPDI, I-SAPS), Social Audits, Public Hearings",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 14,
+          "id": "E3",
+          "stage": "BUDGET OUTCOMES",
+          "question": "Is the distribution of funds proportional to need and/or cost? E.g. are more resources directed to poorer areas, and remote areas where the unit cost of provision of public services is higher?",
+          "prescribed_sources": "PFC Award Horizontal Sharing Formula, District ADP, White Paper Transfer Tables",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        }
+      ]
+    },
+    "finance": {
+      "code": "finance",
+      "assigned_team": "Team 4: Finance, Planning & Cross-Cutting PFM",
+      "scope": "Macro-Fiscal Policy, Planning & Social Welfare",
+      "display_title": "Team 4: Finance, Planning & Cross-Cutting PFM",
+      "short_name": "Finance & Planning",
+      "color": "purple",
+      "workflow": [
+        {
+          "stage": "Step 1: Understand Framework Question",
+          "action": "Read the indicator definition, budget stage, and note the prescribed source document types."
+        },
+        {
+          "stage": "Step 2: Inspect Assigned Budget PDFs",
+          "action": "Open the corresponding PDF file from your departmental documents. Use search keywords (e.g., 'maternal', 'merged areas', 'stipend', 'PFC', 'handicapped', 'minority')."
+        },
+        {
+          "stage": "Step 3: Document Dual Page References",
+          "action": "Record BOTH the printed book page number (visible on the footer/header) AND the PDF viewer digital index page."
+        },
+        {
+          "stage": "Step 4: Transcribe Verbatim Evidence",
+          "action": "Transcribe the exact quoted sentence or budget table row, including exact monetary figures in PKR (Millions or Billions)."
+        },
+        {
+          "stage": "Step 5: Tag Marginalized Dimensions",
+          "action": "Check each applicable dimension box (Gender, Age, Ethnicity/Merged, Religion, Disability, Culture)."
+        },
+        {
+          "stage": "Step 6: Determine Overall Status & Synthesis",
+          "action": "Assess status: [ ] YES (evidence found), [ ] NO (no evidence found), [ ] PARTIAL (marginal/ad-hoc mention), and write your team's rationale."
+        }
+      ],
+      "rubric": [
+        {
+          "dimension": "Gender",
+          "definition": "Programs, targets, or allocations addressing women and girls. Includes maternal healthcare, girls schooling stipends, female teachers/LHVs, women councilor quotas, gender-segregated transport (Pink Buses), and women empowerment centers.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Age",
+          "definition": "Initiatives specifically targeting vulnerable age cohorts: infants and young children (immunization, neo-natal care, malnutrition), youth (skills challenge programs, higher education vouchers, startup funds), and senior citizens (geriatric care, pension protection).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Ethnicity / Regional Parity",
+          "definition": "Interventions addressing historical regional deficits, backwardness, or marginalized geographies: specifically Newly Merged Areas (ex-FATA, Demand 60/61, AIP grants) and remote backward districts (Torghar, Kohistan, Upper Chitral).",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Religion / Minorities",
+          "definition": "Allocations and policies safeguarding religious minority communities (Christians, Sikhs, Hindus): minority welfare grants, security/repair of minority places of worship, scholarships for non-Muslim students, Auqaf allocations.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Physical Disability",
+          "definition": "Targeted support for persons with disabilities (PWDs): special education institutions, accessible public infrastructure/transport, assistive devices, rehabilitation centers, and disability employment quotas.",
+          "allowed": "YES / NO / N/A"
+        },
+        {
+          "dimension": "Culture",
+          "definition": "Preservation and promotion of cultural heritage of indigenous or marginalized groups: museum construction, folk heritage preservation, community cultural endowment funds.",
+          "allowed": "YES / NO / N/A"
+        }
+      ],
+      "catalog": [
+        {
+          "filename": "Integrated_Budget_Call_Circular_2024-25.pdf",
+          "title": "Integrated Budget Call Circular for FY 2024-25",
+          "fy": "2024-25",
+          "filesize": "1.39 MB",
+          "authority": "Finance Department",
+          "content": "Section 7: Gender-Responsive & Climate-Resilient Budgeting Guidelines (doc p. 10 / PDF viewer p. 11), Indicative Ceilings (Demands 16, 17, 61)",
+          "download_url": "files/finance/Integrated_Budget_Call_Circular_2024-25.pdf"
+        },
+        {
+          "filename": "Budget_Strategy_Paper_2021-24.pdf",
+          "title": "Budget Strategy Paper 2021-2024",
+          "fy": "2021-22 to 2023-24",
+          "filesize": "0.70 MB",
+          "authority": "Finance Department",
+          "content": "Box 5 Principles (doc p. 14 / PDF viewer p. 15): Equity for Women, Youth, Minorities & Senior Citizens; Pro-Poor Tax (doc p. 12 / PDF viewer p. 13)",
+          "download_url": "files/finance/Budget_Strategy_Paper_2021-24.pdf"
+        },
+        {
+          "filename": "Annual_Development_Programme_2024-25.pdf",
+          "title": "Annual Development Programme (ADP) 2024-25",
+          "fy": "2024-25",
+          "filesize": "2.83 MB",
+          "authority": "Planning & Development Dept",
+          "content": "Women Development ONGOING & NEW PROGRAMME (doc p. 317 / PDF viewer p. 364), Special Education / PWDs, Minority Affairs (doc p. 23-30), AIP Tribal Schemes",
+          "download_url": "files/finance/Annual_Development_Programme_2024-25.pdf"
+        },
+        {
+          "filename": "Release_Policy_2018-19.pdf",
+          "title": "Release Policy for Financial Year 2018-19",
+          "fy": "2018-19",
+          "filesize": "0.09 MB",
+          "authority": "Finance Department",
+          "content": "100% Unconditional Release for Salaries, Financial Assistance to Deceased Families (doc/PDF viewer p. 2)",
+          "download_url": "files/finance/Release_Policy_2018-19.pdf"
+        },
+        {
+          "filename": "Supplementary_Budget_Statement_2020-21.pdf",
+          "title": "Supplementary Budget Statement 2020-21",
+          "fy": "2020-21",
+          "filesize": "1.63 MB",
+          "authority": "Finance Department",
+          "content": "In-Year Supplementary Grants, EPI Additional Appropriations (Rs 30M doc p. 282 / PDF viewer p. 286), Disaster Relief Grants",
+          "download_url": "files/finance/Supplementary_Budget_Statement_2020-21.pdf"
+        }
+      ],
+      "cards": [
+        {
+          "card_idx": 1,
+          "id": "A5",
+          "stage": "BUDGET PLANNING & CITIZEN PARTICIPATION",
+          "question": "Are CSOs representing the rights of the most marginalised involved in this stage of the process? Have the most marginalised been involved in the process?",
+          "prescribed_sources": "Citizen Budget, Annual Budget Statement, White Paper, BCC",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 2,
+          "id": "B1",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is equity clearly stated as an objective in budget formulation guidelines (i.e., budget call circulars)?",
+          "prescribed_sources": "Budget Call Circular (BCC), BESD, PBB, Budget Strategy Paper",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 3,
+          "id": "B2",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are line ministries' budgets prepared in line with sector objectives and performance indicators?",
+          "prescribed_sources": "Budget Estimates for Service Delivery (BESD), Performance Based Budget (PBB)",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 4,
+          "id": "B3",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is there information on equity considerations in the budget law and supporting documents presented to Parliament?",
+          "prescribed_sources": "White Paper, Annual Budget Statement (Demands for Grants), BESD",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 5,
+          "id": "B4",
+          "stage": "BUDGET FORMULATION",
+          "question": "Is the budget documentation accessible to citizens?",
+          "prescribed_sources": "Citizen Budget (English/Urdu), Annual Budget Statement, Web Portals",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 6,
+          "id": "B5",
+          "stage": "BUDGET FORMULATION",
+          "question": "Are programmes or projects systematically appraised with equity considerations? How are they selected for inclusion in the budget?",
+          "prescribed_sources": "Annual Development Programme (ADP), BESD, White Paper, PC-I Appraisal",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 7,
+          "id": "C1",
+          "stage": "BUDGET EXECUTION",
+          "question": "Is budget executed in line with the budget approved by parliament?",
+          "prescribed_sources": "Year-End Execution Report, Revised Estimates, Annual Receipts & Expenditure, Release Policy",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 8,
+          "id": "C2",
+          "stage": "BUDGET EXECUTION",
+          "question": "Are budget disbursements and execution recorded in the Government Financial Management Information system? What is their level of disaggregation?",
+          "prescribed_sources": "Chart of Accounts, IFMIS / SAP R3 (PIFRA), Monthly Civil Accounts, ABS",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 9,
+          "id": "C3",
+          "stage": "BUDGET EXECUTION",
+          "question": "Do in-year budget virements or supplementary budgets take equity into account? E.g. Do they protect expenditures to disadvantaged groups?",
+          "prescribed_sources": "Supplementary Budget Statement, Re-appropriation Orders, Release Rules",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 10,
+          "id": "D1",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Do financial and nonfinancial budget monitoring reports include equity measures? Are there equity budget performance indicators?",
+          "prescribed_sources": "BESD / PBB Output Indicators, Departmental KPIs, Health/Edu Information Systems",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 11,
+          "id": "D2",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "Are there external evaluations and analysis on budget spending? Do they include equity indicators?",
+          "prescribed_sources": "Auditor General of Pakistan (AGP) Audit Reports, PEFA Assessments",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 12,
+          "id": "D3",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How do monitoring and evaluation reports inform future budget decisions? Are programmes cancelled or amended based on the results they have on disadvantaged groups?",
+          "prescribed_sources": "Audit Follow-up Reports, BESD / PBB Target Adjustments, Planning Feedback",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 13,
+          "id": "D5",
+          "stage": "BUDGET MONITORING & EVALUATION",
+          "question": "How is civil society involved in promoting budget transparency and performance?",
+          "prescribed_sources": "CSO Budget Tracking Reports (CPDI, I-SAPS), Social Audits, Public Hearings",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        },
+        {
+          "card_idx": 14,
+          "id": "E3",
+          "stage": "BUDGET OUTCOMES",
+          "question": "Is the distribution of funds proportional to need and/or cost? E.g. are more resources directed to poorer areas, and remote areas where the unit cost of provision of public services is higher?",
+          "prescribed_sources": "PFC Award Horizontal Sharing Formula, District ADP, White Paper Transfer Tables",
+          "dimensions_available": [
+            "Gender (Women & Girls)",
+            "Age (Infants / Children / Youth)",
+            "Ethnicity / Merged Tribal Areas",
+            "Religion (Minorities)",
+            "Physical Disability (PWDs)",
+            "Culture & Heritage"
+          ],
+          "status_options": [
+            "YES",
+            "NO",
+            "PARTIAL"
+          ]
+        }
+      ]
+    }
+  }
+}
