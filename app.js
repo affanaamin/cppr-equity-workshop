@@ -11,6 +11,7 @@ let currentResponses = {
   answers: {}
 };
 let saveTimeout = null;
+let adminPollInterval = null;
 let customDriveFolder = localStorage.getItem("cppr_drive_folder") || "";
 
 // Initialize App
@@ -185,6 +186,9 @@ function handleLoginSubmit(e) {
 function quickSelectSector(secCode) {
   if (secCode === "admin") {
     openAdmin();
+  } else if (currentParticipant) {
+    // Route through participant sector selection so progress is tracked
+    selectParticipantSector(secCode);
   } else {
     openSector(secCode);
   }
