@@ -156,44 +156,21 @@ function applyWorksheetLockState(secKey) {
 
   if (isFacilitatorInspectMode) {
     if (banner) banner.style.display = "none";
-    return;
-  }
-
-  // Case 1: Departmental / Group Master View (no participant)
-  // Individuals can do it, but they CANNOT edit the departmental ones!
-  if (!currentParticipant) {
-    if (banner) {
-      banner.style.display = "flex";
-      if (bannerText) {
-        bannerText.innerHTML = `<span>🔒 <strong>DEPARTMENTAL MASTER VIEW (Read-Only):</strong> Individuals cannot edit the shared departmental worksheet directly. <button type="button" class="btn-sm" style="background:#ffffff; color:#991b1b; font-weight:800; border:none; margin-left:0.5rem; padding:0.2rem 0.6rem; cursor:pointer;" onclick="logoutSector()">Enter Your Name to Edit Your Own ➔</button></span>`;
-      }
-    }
-
     const inputs = document.querySelectorAll("#cards-container input, #cards-container select, #cards-container textarea, #table-num");
     inputs.forEach(el => {
-      el.disabled = true;
-      el.style.opacity = "0.7";
-      el.style.cursor = "not-allowed";
+      el.disabled = false;
+      el.style.opacity = "";
+      el.style.cursor = "";
     });
-
-    const submitBtn = document.querySelector("#worksheet-view .btn-success");
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = "0.4";
-      submitBtn.style.cursor = "not-allowed";
-      submitBtn.title = "Departmental master view is read-only. Enter your name to submit your own evaluation.";
-    }
     return;
   }
 
-  // Case 2: Individual Participant View (currentParticipant is set)
-  // Individuals CAN edit their own, unless facilitator live-locks this department
   const isLocked = isSectorLocked(secKey);
   if (banner) {
     banner.style.display = isLocked ? "flex" : "none";
     if (bannerText) {
       const secTitle = (appData && appData.sectors[secKey]) ? appData.sectors[secKey].display_title : secKey.toUpperCase();
-      bannerText.textContent = `${secTitle} has been temporarily paused by the Facilitator. Your saved progress is preserved.`;
+      bannerText.innerHTML = `<span>🔒 <strong>${escapeHtml(secTitle)}</strong> is currently LOCKED by the Facilitator. Submissions and editing are paused.</span>`;
     }
   }
 
@@ -218,47 +195,96 @@ function applyWorksheetLockState(secKey) {
   }
 }
 
+// Real-time synchronization across browser tabs
+window.addEventListener("storage", (e) => {
+  if (e.key === "cppr_sector_locks_v2" && e.newValue) {
+    try {
+      sectorLocks = { ...sectorLocks, ...JSON.parse(e.newValue) };
+      updateLoginPillsLockState();
+      updateAdminLockSummaryText();
+      const partCard = document.getElementById("participant-card");
+      if (partCard && partCard.style.display !== "none") {
+        renderParticipantDepartmentCards();
+      }
+      if (currentSector && document.getElementById("worksheet-view").style.display !== "none") {
+        applyWorksheetLockState(currentSector);
+      }
+    } catch(err) {}
+  }
+});
+
 function startParticipantLockPoller() {
   if (participantLockPollInterval) clearInterval(participantLockPollInterval);
 
   const checkLocks = async () => {
+    // 1. Check local server if running
     try {
-      const res = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1&since=10m");
-      if (res.ok) {
-        const text = await res.text();
-        const lines = text.trim().split("\n");
-        let hadLockChange = false;
-        lines.forEach(line => {
-          if (!line) return;
-          try {
-            const item = JSON.parse(line);
-            if (item.event === "message" && item.message) {
-              const parsed = JSON.parse(item.message);
-              if (parsed.action === "LOCK_STATE" && parsed.locks) {
-                const msgTime = parsed.time || ((item.time || 0) * 1000);
-                if (msgTime >= latestLockTimestamp) {
-                  latestLockTimestamp = msgTime;
-                  localStorage.setItem("cppr_lock_timestamp", latestLockTimestamp.toString());
-                  const prev = JSON.stringify(sectorLocks);
-                  const next = JSON.stringify(parsed.locks);
-                  if (prev !== next) {
-                    sectorLocks = { ...sectorLocks, ...parsed.locks };
-                    localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
-                    hadLockChange = true;
-                  }
-                }
-              }
-            }
-          } catch(e) {}
-        });
-
-        if (hadLockChange) {
+      const sRes = await fetch("api/locks");
+      if (sRes.ok) {
+        const sLocks = await sRes.json();
+        const prev = JSON.stringify(sectorLocks);
+        const next = JSON.stringify(sLocks);
+        if (prev !== next) {
+          sectorLocks = { ...sectorLocks, ...sLocks };
+          localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
+          updateLoginPillsLockState();
+          updateAdminLockSummaryText();
           const partCard = document.getElementById("participant-card");
           if (partCard && partCard.style.display !== "none") {
             renderParticipantDepartmentCards();
           }
           if (currentSector && document.getElementById("worksheet-view").style.display !== "none") {
             applyWorksheetLockState(currentSector);
+          }
+        }
+      }
+    } catch(e) {}
+
+    // 2. Poll ntfy.sh for cloud updates
+    try {
+      const res = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1&since=10m");
+      if (res.ok) {
+        const text = await res.text();
+        const lines = text.trim().split("\n");
+        let latestMsg = null;
+        lines.forEach(line => {
+          if (!line) return;
+          try {
+            const item = JSON.parse(line);
+            if (item.event === "message" && item.message) {
+              let parsed;
+              try {
+                parsed = JSON.parse(item.message);
+              } catch(jsonErr) {
+                return;
+              }
+              if (parsed && parsed.action === "LOCK_STATE" && parsed.locks) {
+                const msgTime = parsed.time || ((item.time || 0) * 1000);
+                if (!latestMsg || msgTime > latestMsg.time) {
+                  latestMsg = { time: msgTime, locks: parsed.locks };
+                }
+              }
+            }
+          } catch(e) {}
+        });
+
+        if (latestMsg && latestMsg.time >= latestLockTimestamp) {
+          latestLockTimestamp = latestMsg.time;
+          localStorage.setItem("cppr_lock_timestamp", latestLockTimestamp.toString());
+          const prev = JSON.stringify(sectorLocks);
+          const next = JSON.stringify(latestMsg.locks);
+          if (prev !== next) {
+            sectorLocks = { ...sectorLocks, ...latestMsg.locks };
+            localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
+            updateLoginPillsLockState();
+            updateAdminLockSummaryText();
+            const partCard = document.getElementById("participant-card");
+            if (partCard && partCard.style.display !== "none") {
+              renderParticipantDepartmentCards();
+            }
+            if (currentSector && document.getElementById("worksheet-view").style.display !== "none") {
+              applyWorksheetLockState(currentSector);
+            }
           }
         }
       }
@@ -1211,13 +1237,6 @@ function triggerAutoSave() {
 async function submitResponses(isExplicitSubmit) {
   if (!currentSector) return;
 
-  if (!currentParticipant && !isFacilitatorInspectMode) {
-    if (isExplicitSubmit) {
-      showToast("🔒 Departmental master view is read-only. Enter your name to edit and submit your own.", true);
-    }
-    return;
-  }
-
   if (isSectorLocked(currentSector)) {
     if (isExplicitSubmit) {
       showToast(`🔒 Submissions are paused. This department is currently locked by the Facilitator.`, true);
@@ -1228,8 +1247,15 @@ async function submitResponses(isExplicitSubmit) {
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+  const tableInput = document.getElementById("table-num");
+  const tableVal = (tableInput?.value || "").trim();
   if (currentParticipant) {
     currentResponses.participant_name = currentParticipant;
+  } else if (tableVal) {
+    currentResponses.participant_name = tableVal;
+  }
+  if (tableVal) {
+    currentResponses.table_number = tableVal;
   }
   currentResponses.last_saved = timeStr;
 
@@ -1258,7 +1284,7 @@ async function submitResponses(isExplicitSubmit) {
 
     const payload = {
       sector: currentSector,
-      participant_name: currentParticipant || "",
+      participant_name: currentResponses.participant_name || currentParticipant || "",
       table_number: currentResponses.table_number || (currentParticipant ? `Table - ${currentParticipant}` : `Table - ${currentSector}`),
       completed_count: answeredCount,
       last_saved: timeStr,
@@ -1276,7 +1302,7 @@ async function submitResponses(isExplicitSubmit) {
   try {
     const payload = {
       sector: currentSector,
-      participant_name: currentParticipant || "",
+      participant_name: currentResponses.participant_name || currentParticipant || "",
       table_number: currentResponses.table_number || (currentParticipant ? `Table - ${currentParticipant}` : `Table - ${currentSector}`),
       completed_count: answeredCount,
       last_saved: timeStr,
@@ -1311,8 +1337,8 @@ async function submitResponses(isExplicitSubmit) {
 function resetCurrentWorksheet() {
   if (!currentSector) return;
 
-  if (!currentParticipant && !isFacilitatorInspectMode) {
-    showToast("🔒 Departmental master worksheet cannot be cleared by participants. Enter your name to manage your own worksheet.", true);
+  if (isSectorLocked(currentSector)) {
+    showToast("🔒 Cannot reset worksheet while department is locked by Facilitator.", true);
     return;
   }
 
