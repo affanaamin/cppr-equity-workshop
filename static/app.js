@@ -24,15 +24,20 @@ let sectorLocks = {
   education: false,
   finance: false
 };
+let latestLockTimestamp = parseInt(localStorage.getItem("cppr_lock_timestamp") || "0", 10);
 
 function initSectorLocks() {
   sectorLocks = { health: false, local: false, education: false, finance: false };
   try {
-    // Purge any stale legacy lock states
+    // Purge legacy lock keys
     localStorage.removeItem("cppr_sector_locks");
     const saved = localStorage.getItem("cppr_sector_locks_v2");
     if (saved) {
       sectorLocks = { ...sectorLocks, ...JSON.parse(saved) };
+    }
+    const savedTs = localStorage.getItem("cppr_lock_timestamp");
+    if (savedTs) {
+      latestLockTimestamp = parseInt(savedTs, 10);
     }
   } catch(e) {}
 }
@@ -47,6 +52,8 @@ function toggleSectorLock(secKey) {
   if (!sectorLocks.hasOwnProperty(secKey)) return;
   const newStatus = !sectorLocks[secKey];
   sectorLocks[secKey] = newStatus;
+  latestLockTimestamp = Date.now();
+  localStorage.setItem("cppr_lock_timestamp", latestLockTimestamp.toString());
   saveAndBroadcastLocks();
   renderAdminTeams(adminSubmissionsCache);
   const secName = (appData && appData.sectors[secKey] && appData.sectors[secKey].short_name) || secKey.toUpperCase();
@@ -60,6 +67,8 @@ function setAllDepartmentLocks(lockState) {
     education: lockState,
     finance: lockState
   };
+  latestLockTimestamp = Date.now();
+  localStorage.setItem("cppr_lock_timestamp", latestLockTimestamp.toString());
   saveAndBroadcastLocks();
   renderAdminTeams(adminSubmissionsCache);
   showToast(`All 4 departments are now ${lockState ? '🔒 LOCKED' : '🔓 UNLOCKED'}!`, false);
@@ -82,7 +91,7 @@ function saveAndBroadcastLocks() {
       body: JSON.stringify({
         action: "LOCK_STATE",
         locks: sectorLocks,
-        time: Date.now()
+        time: latestLockTimestamp || Date.now()
       })
     }).catch(e => {});
   } catch(e) {}
@@ -180,9 +189,10 @@ function applyWorksheetLockState(secKey) {
 
 function startParticipantLockPoller() {
   if (participantLockPollInterval) clearInterval(participantLockPollInterval);
-  participantLockPollInterval = setInterval(async () => {
+
+  const checkLocks = async () => {
     try {
-      const res = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1&since=20s");
+      const res = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1&since=10m");
       if (res.ok) {
         const text = await res.text();
         const lines = text.trim().split("\n");
@@ -194,16 +204,17 @@ function startParticipantLockPoller() {
             if (item.event === "message" && item.message) {
               const parsed = JSON.parse(item.message);
               if (parsed.action === "LOCK_STATE" && parsed.locks) {
-                // Reject stale messages older than 2 minutes
-                if (parsed.time && (Date.now() - parsed.time > 120000)) {
-                  return;
-                }
-                const prev = JSON.stringify(sectorLocks);
-                const next = JSON.stringify(parsed.locks);
-                if (prev !== next) {
-                  sectorLocks = { ...sectorLocks, ...parsed.locks };
-                  localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
-                  hadLockChange = true;
+                const msgTime = parsed.time || ((item.time || 0) * 1000);
+                if (msgTime >= latestLockTimestamp) {
+                  latestLockTimestamp = msgTime;
+                  localStorage.setItem("cppr_lock_timestamp", latestLockTimestamp.toString());
+                  const prev = JSON.stringify(sectorLocks);
+                  const next = JSON.stringify(parsed.locks);
+                  if (prev !== next) {
+                    sectorLocks = { ...sectorLocks, ...parsed.locks };
+                    localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
+                    hadLockChange = true;
+                  }
                 }
               }
             }
@@ -221,7 +232,11 @@ function startParticipantLockPoller() {
         }
       }
     } catch(e) {}
-  }, 6000);
+  };
+
+  // Run immediately on call
+  checkLocks();
+  participantLockPollInterval = setInterval(checkLocks, 4000);
 }
 
 // Initialize App
@@ -1578,6 +1593,11 @@ async function openAdmin() {
   document.getElementById("worksheet-view").style.display = "none";
   document.getElementById("admin-view").style.display = "flex";
   document.title = "Facilitator Dashboard — CPPR Equity Budgeting Workshop";
+  updateAdminLockSummaryText();
+  renderAdminTeams(adminSubmissionsCache);
+  if (!adminPollInterval) {
+    adminPollInterval = setInterval(refreshAdminData, 6000);
+  }
   await refreshAdminData();
 }
 
@@ -1630,8 +1650,13 @@ async function refreshAdminData() {
           if (item.event === "message" && item.message) {
             const parsed = JSON.parse(item.message);
             if (parsed.action === "LOCK_STATE" && parsed.locks) {
-              sectorLocks = { ...sectorLocks, ...parsed.locks };
-              localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+              const msgTime = parsed.time || ((item.time || 0) * 1000);
+              if (msgTime >= latestLockTimestamp) {
+                latestLockTimestamp = msgTime;
+                localStorage.setItem("cppr_lock_timestamp", latestLockTimestamp.toString());
+                sectorLocks = { ...sectorLocks, ...parsed.locks };
+                localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
+              }
             } else if (parsed.action === "RESET_ALL" && parsed.reset_time) {
               if (parsed.reset_time > latestGlobalReset) {
                 latestGlobalReset = parsed.reset_time;
