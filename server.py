@@ -71,20 +71,27 @@ async def get_all_submissions():
     return results
 
 @app.get("/api/submissions/{sector}")
-async def get_sector_submission(sector: str):
+async def get_sector_submission(sector: str, participant: Optional[str] = None):
     sec = sector.lower().strip()
     if sec not in WORKSHOP_DATA["sectors"]:
         raise HTTPException(status_code=404, detail="Sector not found")
     sec_file = os.path.join(SUBMISSIONS_DIR, f"{sec}_submission.json")
     if os.path.exists(sec_file):
         with open(sec_file, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            if participant and participant.strip():
+                p_name = participant.strip()
+                participants = data.get("participants", {})
+                if p_name in participants:
+                    return participants[p_name]
+            return data
     return {
         "sector": sec,
         "status": "not_started",
         "table_number": "",
         "last_saved": None,
-        "answers": {}
+        "answers": {},
+        "participants": {}
     }
 
 @app.post("/api/submissions/{sector}")
@@ -112,9 +119,39 @@ async def save_sector_submission(sector: str, payload: Dict[str, Any]):
     payload["completed_count"] = completed_count
     payload["total_count"] = len(cards_list)
     payload["completion_pct"] = round((completed_count / len(cards_list)) * 100) if cards_list else 0
+
+    # Load existing file to preserve participant list and departmental state
+    json_path = os.path.join(SUBMISSIONS_DIR, f"{sec}_submission.json")
+    existing_data = {}
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+        except Exception:
+            existing_data = {}
+
+    participants = existing_data.get("participants", {})
+    if "participants" in payload and isinstance(payload["participants"], dict):
+        participants.update(payload["participants"])
+
+    p_name = (payload.get("participant_name") or "").strip()
+    if p_name:
+        participants[p_name] = {
+            "participant_name": p_name,
+            "table_number": payload.get("table_number", ""),
+            "completed_count": completed_count,
+            "total_count": len(cards_list),
+            "completion_pct": payload["completion_pct"],
+            "last_saved": now_iso,
+            "answers": answers
+        }
+        # If payload table_number is not set or empty, preserve existing table_number
+        if not payload.get("table_number") and existing_data.get("table_number"):
+            payload["table_number"] = existing_data["table_number"]
+    
+    payload["participants"] = participants
     
     # 1. Save JSON
-    json_path = os.path.join(SUBMISSIONS_DIR, f"{sec}_submission.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
         
@@ -135,7 +172,8 @@ async def save_sector_submission(sector: str, payload: Dict[str, Any]):
         "message": f"Responses for {sec} saved successfully.",
         "last_saved": now_iso,
         "completed_count": completed_count,
-        "completion_pct": payload["completion_pct"]
+        "completion_pct": payload["completion_pct"],
+        "participant_name": p_name if p_name else None
     }
 
 @app.post("/api/reset")
@@ -210,8 +248,11 @@ def generate_completed_excel(sec: str, payload: Dict[str, Any]):
     ws_ov["A1"].font = title_font
     ws_ov["A1"].alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     
-    ws_ov["A4"] = "Assigned Team:"; ws_ov["A4"].font = bold_font
-    ws_ov["B4"] = sec_info["display_title"]; ws_ov["B4"].font = data_font
+    ws_ov["A4"] = "Assigned Team / Participant:"; ws_ov["A4"].font = bold_font
+    team_label = sec_info["display_title"]
+    if payload.get("participant_name"):
+        team_label += f" (Participant: {payload['participant_name']})"
+    ws_ov["B4"] = team_label; ws_ov["B4"].font = data_font
     
     ws_ov["A5"] = "Departmental Scope:"; ws_ov["A5"].font = bold_font
     ws_ov["B5"] = sec_info["scope"]; ws_ov["B5"].font = data_font
@@ -371,7 +412,8 @@ def generate_completed_docx(sec: str, payload: Dict[str, Any]):
     p_meta = doc.add_paragraph()
     p_meta.paragraph_format.space_before = Pt(0)
     p_meta.paragraph_format.space_after = Pt(6)
-    r_m = p_meta.add_run(f"Departmental Focus: {sec_info['scope']}  |  Table: {payload.get('table_number', '1')}  |  Submitted: {payload.get('last_saved', '')}")
+    part_str = f"  |  Participant: {payload.get('participant_name')}" if payload.get("participant_name") else ""
+    r_m = p_meta.add_run(f"Departmental Focus: {sec_info['scope']}  |  Table: {payload.get('table_number', '1')}{part_str}  |  Submitted: {payload.get('last_saved', '')}")
     r_m.font.name = "Calibri"; r_m.font.size = Pt(9); r_m.font.italic = True
     r_m.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
     

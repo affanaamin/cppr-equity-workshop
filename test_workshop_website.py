@@ -119,9 +119,116 @@ def run_tests():
     assert all_subs["health"]["completed_count"] == 2
     print("[PASS] Facilitator API returns real-time progress across all 4 line departments.")
 
+    # 9. Test Participant Workflow Markup & Client Scripts
+    print("\n9. Testing Participant Workflow Markup & Scripts...")
+    r_landing = client.get("/")
+    assert "participant-card" in r_landing.text
+    assert "participant-sectors-container" in r_landing.text
+    assert "recent-participants-box" in r_landing.text
+    r_js = client.get("/static/app.js")
+    assert "showParticipantPicker" in r_js.text
+    assert "getParticipantProgress" in r_js.text
+    assert "selectParticipantSector" in r_js.text
+    assert "viewParticipantWorksheet" in r_js.text
+    print("[PASS] Participant department picker UI and JS methods verified.")
+
+    # 10. Test Individual Participant Submission & Isolation
+    print("\n10. Testing Individual Participant Submissions...")
+    tariq_payload = {
+        "participant_name": "Dr. Tariq",
+        "table_number": "Table 3 - Education Team",
+        "answers": {
+            "A5": {
+                "pdf_searched": "Citizen_Budget_2024-25.pdf",
+                "book_page": "14",
+                "pdf_page": "15",
+                "page_ref": "Doc p. 14 / PDF p. 15",
+                "evidence": "Civil society consultations with teachers and disability rights groups.",
+                "dimensions": ["Gender (Women & Girls)", "Disability (Special Needs)"],
+                "status": "YES",
+                "rationale": "Special education teacher consultations were documented."
+            }
+        }
+    }
+    r_tariq = client.post("/api/submissions/education", json=tariq_payload)
+    assert r_tariq.status_code == 200
+    tariq_res = r_tariq.json()
+    assert tariq_res["participant_name"] == "Dr. Tariq"
+    assert tariq_res["completed_count"] == 1
+
+    # 11. Test Multi-Participant Coexistence in Facilitator Desk
+    print("\n11. Testing Multi-Participant Coexistence in Same Department...")
+    ayesha_payload = {
+        "participant_name": "Ayesha Siddiqa",
+        "table_number": "Table 3 - Education Team",
+        "answers": {
+            "A5": {
+                "pdf_searched": "Citizen_Budget_2024-25.pdf",
+                "book_page": "14",
+                "pdf_page": "15",
+                "evidence": "Separate Girls stipend budget lines confirmed.",
+                "dimensions": ["Gender (Women & Girls)"],
+                "status": "YES",
+                "rationale": "Gender equity allocation benchmarked."
+            },
+            "B1": {
+                "pdf_searched": "Output_Based_Budget_Education.pdf",
+                "book_page": "45",
+                "pdf_page": "48",
+                "evidence": "Enrollment KPI targets set for rural schools.",
+                "dimensions": ["Ethnicity / Merged Tribal Areas"],
+                "status": "YES",
+                "rationale": "KPI targets formalized."
+            }
+        }
+    }
+    r_ayesha = client.post("/api/submissions/education", json=ayesha_payload)
+    assert r_ayesha.status_code == 200
+
+    # Verify both participants exist in education submissions
+    r_edu_all = client.get("/api/submissions")
+    assert r_edu_all.status_code == 200
+    all_data = r_edu_all.json()
+    edu_parts = all_data["education"]["participants"]
+    assert "Dr. Tariq" in edu_parts
+    assert "Ayesha Siddiqa" in edu_parts
+    assert edu_parts["Dr. Tariq"]["completed_count"] == 1
+    assert edu_parts["Ayesha Siddiqa"]["completed_count"] == 2
+    print("[PASS] Both participants tracked simultaneously under Education department.")
+
+    # 12. Test Participant Multi-Department Progress Preservation
+    print("\n12. Testing Cross-Department Progress Preservation for Same Participant...")
+    tariq_finance_payload = {
+        "participant_name": "Dr. Tariq",
+        "table_number": "Table 4 - PFM",
+        "answers": {
+            "A5": {
+                "pdf_searched": "Budget_Strategy_Paper.pdf",
+                "evidence": "Civil society consultation framework in Medium-Term Fiscal Framework.",
+                "status": "PARTIAL",
+                "rationale": "Mentioned but no dedicated seat."
+            }
+        }
+    }
+    r_tariq_fin = client.post("/api/submissions/finance", json=tariq_finance_payload)
+    assert r_tariq_fin.status_code == 200
+
+    # Retrieve Tariq's education and finance submissions
+    r_tariq_edu = client.get("/api/submissions/education?participant=Dr.+Tariq")
+    assert r_tariq_edu.status_code == 200
+    assert r_tariq_edu.json()["participant_name"] == "Dr. Tariq"
+    assert r_tariq_edu.json()["completed_count"] == 1
+
+    r_tariq_fin_get = client.get("/api/submissions/finance?participant=Dr.+Tariq")
+    assert r_tariq_fin_get.status_code == 200
+    assert r_tariq_fin_get.json()["participant_name"] == "Dr. Tariq"
+    assert r_tariq_fin_get.json()["completed_count"] == 1
+    print("[PASS] Participant's progress preserved across multiple departments independently.")
+
     print("\n====================================================")
     print("ALL TESTS PASSED WITH 100% SUCCESS!")
     print("====================================================")
 
 if __name__ == "__main__":
     run_tests()
+

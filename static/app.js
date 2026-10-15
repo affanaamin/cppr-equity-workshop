@@ -4,7 +4,9 @@
 
 let appData = null;
 let currentSector = null;
+let currentParticipant = null;
 let currentResponses = {
+  participant_name: "",
   table_number: "",
   answers: {}
 };
@@ -29,9 +31,88 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+function sanitizeParticipantKey(name) {
+  if (!name) return "";
+  return name.toLowerCase().trim().replace(/[^a-z0-9_-]/g, "_");
+}
+
+function getStorageKey(secKey, participant) {
+  if (participant && participant.trim()) {
+    return `cppr_user_responses_${sanitizeParticipantKey(participant)}_${secKey}`;
+  }
+  return `cppr_responses_${secKey}`;
+}
+
+function getParticipantProgress(participantName, secKey) {
+  const key = getStorageKey(secKey, participantName);
+  const str = localStorage.getItem(key);
+  let data = { table_number: "", answers: {} };
+  if (str) {
+    try { data = JSON.parse(str); } catch (e) {}
+  }
+  let completedCount = 0;
+  const totalCount = 14;
+  const answers = data.answers || {};
+  for (const cid in answers) {
+    const a = answers[cid];
+    if (a && a.status && a.evidence && a.evidence.trim().length > 0) {
+      completedCount++;
+    }
+  }
+  const pct = Math.round((completedCount / totalCount) * 100);
+  return {
+    completedCount,
+    totalCount,
+    pct,
+    table_number: data.table_number || "",
+    answers,
+    hasData: completedCount > 0 || Boolean(data.table_number) || Object.keys(answers).length > 0
+  };
+}
+
+function recordParticipant(participantName, secKey) {
+  if (!participantName || !participantName.trim()) return;
+  const trimmed = participantName.trim();
+  const key = sanitizeParticipantKey(trimmed);
+  let reg = {};
+  try {
+    reg = JSON.parse(localStorage.getItem("cppr_participants_registry") || "{}");
+  } catch (e) {}
+  if (!reg[key]) {
+    reg[key] = { name: trimmed, sectors: {}, lastActive: new Date().toISOString() };
+  }
+  reg[key].name = trimmed;
+  reg[key].lastActive = new Date().toISOString();
+  if (secKey) {
+    reg[key].lastSector = secKey;
+    reg[key].sectors[secKey] = true;
+  }
+  localStorage.setItem("cppr_participants_registry", JSON.stringify(reg));
+}
+
+function getSavedParticipants() {
+  let reg = {};
+  try {
+    reg = JSON.parse(localStorage.getItem("cppr_participants_registry") || "{}");
+  } catch (e) {}
+  return Object.values(reg);
+}
+
 function checkUrlOrStorageLogin() {
   const urlParams = new URLSearchParams(window.location.search);
+  const paramParticipant = urlParams.get("participant");
   const paramSector = urlParams.get("sector") || window.location.hash.replace("#", "");
+
+  if (paramParticipant && paramParticipant.trim()) {
+    currentParticipant = paramParticipant.trim();
+    sessionStorage.setItem("cppr_participant_name", currentParticipant);
+    recordParticipant(currentParticipant);
+  } else {
+    const savedPart = sessionStorage.getItem("cppr_participant_name");
+    if (savedPart && savedPart.trim()) {
+      currentParticipant = savedPart.trim();
+    }
+  }
 
   if (paramSector) {
     const norm = normalizeSectorCode(paramSector);
@@ -48,6 +129,8 @@ function checkUrlOrStorageLogin() {
   const savedSector = sessionStorage.getItem("cppr_active_sector");
   if (savedSector && appData.sectors[savedSector]) {
     openSector(savedSector);
+  } else if (currentParticipant) {
+    showParticipantPicker(currentParticipant);
   } else {
     showLoginView();
   }
@@ -68,14 +151,30 @@ function normalizeSectorCode(raw) {
 function handleLoginSubmit(e) {
   if (e) e.preventDefault();
   const inputEl = document.getElementById("sector-input");
-  const norm = normalizeSectorCode(inputEl.value);
+  const val = (inputEl.value || "").trim();
+
+  if (!val) {
+    showToast("Please enter your name or a sector code.", true);
+    inputEl.style.borderColor = "#ef4444";
+    setTimeout(() => { inputEl.style.borderColor = ""; }, 1500);
+    return;
+  }
+
+  const norm = normalizeSectorCode(val);
 
   if (norm === "admin") {
+    currentParticipant = null;
+    sessionStorage.removeItem("cppr_participant_name");
     openAdmin();
   } else if (norm && appData.sectors[norm]) {
+    currentParticipant = null;
+    sessionStorage.removeItem("cppr_participant_name");
     openSector(norm);
+  } else if (val.length >= 2) {
+    // Participant Name entered!
+    showParticipantPicker(val);
   } else {
-    showToast("Invalid code. Please enter 'health', 'finance', 'education', or 'local'.", true);
+    showToast("Please enter your name or an assigned sector code.", true);
     inputEl.style.borderColor = "#ef4444";
     setTimeout(() => {
       inputEl.style.borderColor = "";
@@ -91,12 +190,155 @@ function quickSelectSector(secCode) {
   }
 }
 
+function showParticipantPicker(participantName) {
+  if (!participantName || !participantName.trim()) return;
+  currentParticipant = participantName.trim();
+  sessionStorage.setItem("cppr_participant_name", currentParticipant);
+  recordParticipant(currentParticipant);
+
+  document.getElementById("login-view").style.display = "flex";
+  const mainCard = document.getElementById("login-card-main");
+  if (mainCard) mainCard.style.display = "none";
+  const partCard = document.getElementById("participant-card");
+  if (partCard) partCard.style.display = "block";
+  document.getElementById("worksheet-view").style.display = "none";
+  document.getElementById("admin-view").style.display = "none";
+
+  const titleEl = document.getElementById("participant-welcome-title");
+  const subEl = document.getElementById("participant-welcome-subtitle");
+
+  // Check progress across sectors
+  const sectors = ["health", "local", "education", "finance"];
+  let hasAnyProgress = false;
+  let totalDone = 0;
+  sectors.forEach(s => {
+    const prog = getParticipantProgress(currentParticipant, s);
+    if (prog.hasData) hasAnyProgress = true;
+    totalDone += prog.completedCount;
+  });
+
+  if (hasAnyProgress) {
+    titleEl.innerHTML = `Welcome back, <span style="color:var(--accent-blue);">${escapeHtml(currentParticipant)}</span>!`;
+    subEl.textContent = `Your saved departmental evaluation progress is loaded below. Choose a department to resume or begin:`;
+  } else {
+    titleEl.innerHTML = `Welcome, <span style="color:var(--accent-blue);">${escapeHtml(currentParticipant)}</span>!`;
+    subEl.textContent = `Select which department you would like to evaluate on your own:`;
+  }
+
+  renderParticipantDepartmentCards();
+}
+
+function renderParticipantDepartmentCards() {
+  const container = document.getElementById("participant-sectors-container");
+  if (!container || !appData) return;
+  container.innerHTML = "";
+
+  const secMeta = [
+    { key: "health", icon: "🏥" },
+    { key: "local", icon: "🏛️" },
+    { key: "education", icon: "🎓" },
+    { key: "finance", icon: "💼" }
+  ];
+
+  secMeta.forEach(item => {
+    const secInfo = appData.sectors[item.key];
+    const prog = getParticipantProgress(currentParticipant, item.key);
+
+    let statusBadgeHtml = `<span class="dept-card-status-badge not-started">Not Started</span>`;
+    let actionBtnText = `Start Worksheet ➔`;
+    let cardClass = "participant-dept-card";
+
+    if (prog.completedCount === 14) {
+      statusBadgeHtml = `<span class="dept-card-status-badge completed">✓ Complete (100%)</span>`;
+      actionBtnText = `Review Worksheet ➔`;
+      cardClass += " complete-progress";
+    } else if (prog.completedCount > 0 || prog.hasData) {
+      statusBadgeHtml = `<span class="dept-card-status-badge in-progress">In Progress: ${prog.completedCount} / 14 (${prog.pct}%)</span>`;
+      actionBtnText = `Resume Progress ➔`;
+      cardClass += " active-progress";
+    }
+
+    const card = document.createElement("div");
+    card.className = cardClass;
+    card.onclick = () => selectParticipantSector(item.key);
+
+    card.innerHTML = `
+      <div>
+        <div class="dept-card-top">
+          <div class="dept-card-icon">${item.icon}</div>
+          <div class="dept-card-info">
+            <div class="dept-card-title">${escapeHtml(secInfo.display_title)}</div>
+            <div class="dept-card-scope">${escapeHtml(secInfo.scope)}</div>
+          </div>
+        </div>
+        <div class="progress-track" style="height: 6px; margin: 0.5rem 0;">
+          <div class="progress-fill" style="width: ${prog.pct}%;"></div>
+        </div>
+      </div>
+      <div class="dept-card-meta">
+        ${statusBadgeHtml}
+        <span class="dept-card-action-btn">${actionBtnText}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectParticipantSector(secKey) {
+  if (!appData || !appData.sectors[secKey]) return;
+  currentSector = secKey;
+  sessionStorage.setItem("cppr_active_sector", secKey);
+  recordParticipant(currentParticipant, secKey);
+
+  // Update URL state
+  const newUrl = `${window.location.pathname}?participant=${encodeURIComponent(currentParticipant)}&sector=${encodeURIComponent(secKey)}`;
+  window.history.pushState({}, "", newUrl);
+
+  openSector(secKey);
+}
+
+function backToMainLogin() {
+  currentParticipant = null;
+  sessionStorage.removeItem("cppr_participant_name");
+  sessionStorage.removeItem("cppr_active_sector");
+  window.history.pushState({}, "", window.location.pathname);
+  showLoginView();
+}
+
+function renderRecentParticipantsList() {
+  const box = document.getElementById("recent-participants-box");
+  const list = document.getElementById("recent-participants-list");
+  if (!box || !list) return;
+
+  const saved = getSavedParticipants();
+  if (!saved || saved.length === 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  list.innerHTML = "";
+  saved.slice(-6).reverse().forEach(p => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "recent-participant-chip";
+    chip.innerHTML = `<span>👤</span><span>${escapeHtml(p.name)}</span>`;
+    chip.onclick = () => showParticipantPicker(p.name);
+    list.appendChild(chip);
+  });
+  box.style.display = "block";
+}
+
 function showLoginView() {
   document.getElementById("login-view").style.display = "flex";
+  const mainCard = document.getElementById("login-card-main");
+  if (mainCard) mainCard.style.display = "block";
+  const partCard = document.getElementById("participant-card");
+  if (partCard) partCard.style.display = "none";
   document.getElementById("worksheet-view").style.display = "none";
   document.getElementById("admin-view").style.display = "none";
   const inputEl = document.getElementById("sector-input");
   inputEl.value = "";
+  renderRecentParticipantsList();
   setTimeout(() => inputEl.focus(), 100);
 }
 
@@ -106,31 +348,69 @@ function logoutSector() {
     adminPollInterval = null;
   }
   sessionStorage.removeItem("cppr_active_sector");
-  window.history.pushState({}, "", window.location.pathname);
-  showLoginView();
+
+  if (currentParticipant) {
+    const newUrl = `${window.location.pathname}?participant=${encodeURIComponent(currentParticipant)}`;
+    window.history.pushState({}, "", newUrl);
+    showParticipantPicker(currentParticipant);
+  } else {
+    window.history.pushState({}, "", window.location.pathname);
+    showLoginView();
+  }
 }
 
 // Open Specific Sector Worksheet
 async function openSector(secKey) {
   currentSector = secKey;
   sessionStorage.setItem("cppr_active_sector", secKey);
-  window.location.hash = secKey;
 
   const secInfo = appData.sectors[secKey];
-  document.title = `${secInfo.display_title} — CPPR Equity Budgeting Workshop`;
+  if (currentParticipant) {
+    document.title = `${secInfo.display_title} (${currentParticipant}) — CPPR Equity Budgeting Workshop`;
+  } else {
+    document.title = `${secInfo.display_title} — CPPR Equity Budgeting Workshop`;
+  }
 
   document.getElementById("login-view").style.display = "none";
   document.getElementById("admin-view").style.display = "none";
   document.getElementById("worksheet-view").style.display = "flex";
 
   // Update Header Banner
-  document.getElementById("top-sector-name").textContent = secInfo.display_title;
-  document.getElementById("banner-team-name").textContent = secInfo.display_title;
+  const topNameEl = document.getElementById("top-sector-name");
+  const bannerTeamEl = document.getElementById("banner-team-name");
+  const partTagEl = document.getElementById("header-participant-tag");
+  const switchBtn = document.getElementById("btn-switch-sector");
+
+  if (currentParticipant) {
+    topNameEl.textContent = `${secInfo.display_title} — ${currentParticipant}`;
+    bannerTeamEl.textContent = `${currentParticipant} — ${secInfo.display_title}`;
+    if (partTagEl) {
+      partTagEl.textContent = `👤 ${currentParticipant}`;
+      partTagEl.style.display = "inline-flex";
+    }
+    if (switchBtn) {
+      switchBtn.textContent = `🚪 Switch Dept`;
+    }
+  } else {
+    topNameEl.textContent = secInfo.display_title;
+    bannerTeamEl.textContent = secInfo.display_title;
+    if (partTagEl) {
+      partTagEl.style.display = "none";
+    }
+    if (switchBtn) {
+      switchBtn.textContent = `🚪 Switch Sector`;
+    }
+  }
+
   document.getElementById("banner-scope").textContent = secInfo.scope;
 
   // Load responses from LocalStorage first, then server
   loadLocalResponses(secKey);
   await fetchServerResponses(secKey);
+
+  if (currentParticipant && !currentResponses.table_number) {
+    currentResponses.table_number = currentParticipant;
+  }
 
   document.getElementById("table-num").value = currentResponses.table_number || "";
 
@@ -146,26 +426,42 @@ async function openSector(secKey) {
 }
 
 function loadLocalResponses(secKey) {
-  const localStr = localStorage.getItem(`cppr_responses_${secKey}`);
+  const storageKey = getStorageKey(secKey, currentParticipant);
+  const localStr = localStorage.getItem(storageKey);
   if (localStr) {
     try {
       currentResponses = JSON.parse(localStr);
+      if (currentParticipant && !currentResponses.participant_name) {
+        currentResponses.participant_name = currentParticipant;
+      }
     } catch (e) {
-      currentResponses = { table_number: "", answers: {} };
+      currentResponses = { 
+        participant_name: currentParticipant || "",
+        table_number: currentParticipant || "", 
+        answers: {} 
+      };
     }
   } else {
-    currentResponses = { table_number: "", answers: {} };
+    currentResponses = { 
+      participant_name: currentParticipant || "",
+      table_number: currentParticipant || "", 
+      answers: {} 
+    };
   }
 }
 
 async function fetchServerResponses(secKey) {
   try {
-    const res = await fetch(`/api/submissions/${secKey}`);
+    let url = `/api/submissions/${secKey}`;
+    if (currentParticipant) {
+      url += `?participant=${encodeURIComponent(currentParticipant)}`;
+    }
+    const res = await fetch(url);
     if (res.ok) {
       const serverData = await res.json();
       if (serverData && serverData.answers && Object.keys(serverData.answers).length > 0) {
         // Merge server responses with local responses
-        currentResponses.table_number = serverData.table_number || currentResponses.table_number || "";
+        currentResponses.table_number = serverData.table_number || currentResponses.table_number || (currentParticipant || "");
         currentResponses.answers = { ...serverData.answers, ...currentResponses.answers };
       }
     }
@@ -484,7 +780,12 @@ function updateProgress() {
 // AutoSave Mechanism
 function triggerAutoSave() {
   setSyncStatus("Saving...", "#f59e0b");
-  localStorage.setItem(`cppr_responses_${currentSector}`, JSON.stringify(currentResponses));
+  if (currentParticipant) {
+    currentResponses.participant_name = currentParticipant;
+  }
+  const storageKey = getStorageKey(currentSector, currentParticipant);
+  localStorage.setItem(storageKey, JSON.stringify(currentResponses));
+  recordParticipant(currentParticipant, currentSector);
 
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async () => {
@@ -498,36 +799,65 @@ async function submitResponses(isExplicitSubmit) {
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // 1. Always save locally
-  localStorage.setItem(`cppr_responses_${currentSector}`, JSON.stringify(currentResponses));
+  if (currentParticipant) {
+    currentResponses.participant_name = currentParticipant;
+  }
+  currentResponses.last_saved = timeStr;
+
+  // 1. Always save locally under proper storage key
+  const storageKey = getStorageKey(currentSector, currentParticipant);
+  localStorage.setItem(storageKey, JSON.stringify(currentResponses));
+  recordParticipant(currentParticipant, currentSector);
+
+  const answeredCount = Object.keys(currentResponses.answers || {}).length;
 
   // 2. Real-time Cloud Push to ntfy.sh so facilitator receives instant alerts anywhere
   try {
-    const answeredCount = Object.keys(currentResponses.answers || {}).length;
+    const ntfyTitle = currentParticipant 
+      ? `CPPR: ${currentSector.toUpperCase()} (${currentParticipant})`
+      : `CPPR Workshop Submission: ${currentSector.toUpperCase()}`;
+    
+    const ntfyHeaders = {
+      "Title": ntfyTitle,
+      "Priority": isExplicitSubmit ? "high" : "default",
+      "Tags": isExplicitSubmit ? "white_check_mark,clipboard" : "pencil2",
+      "X-Sector": currentSector
+    };
+    if (currentParticipant) {
+      ntfyHeaders["X-Participant"] = currentParticipant;
+    }
+
+    const payload = {
+      sector: currentSector,
+      participant_name: currentParticipant || "",
+      table_number: currentResponses.table_number || (currentParticipant ? `Table - ${currentParticipant}` : `Table - ${currentSector}`),
+      completed_count: answeredCount,
+      last_saved: timeStr,
+      answers: currentResponses.answers
+    };
+
     fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
       method: "POST",
-      headers: {
-        "Title": `CPPR Workshop Submission: ${currentSector.toUpperCase()}`,
-        "Priority": isExplicitSubmit ? "high" : "default",
-        "Tags": isExplicitSubmit ? "white_check_mark,clipboard" : "pencil2",
-        "X-Sector": currentSector
-      },
-      body: JSON.stringify({
-        sector: currentSector,
-        table_number: currentResponses.table_number || `Table - ${currentSector}`,
-        completed_count: answeredCount,
-        last_saved: timeStr,
-        answers: currentResponses.answers
-      })
+      headers: ntfyHeaders,
+      body: JSON.stringify(payload)
     }).catch(e => console.log("Cloud sync note:", e));
   } catch (e) {}
 
   // 3. Post to server endpoint if running
   try {
+    const payload = {
+      sector: currentSector,
+      participant_name: currentParticipant || "",
+      table_number: currentResponses.table_number || (currentParticipant ? `Table - ${currentParticipant}` : `Table - ${currentSector}`),
+      completed_count: answeredCount,
+      last_saved: timeStr,
+      answers: currentResponses.answers
+    };
+
     const res = await fetch(`api/submissions/${currentSector}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(currentResponses)
+      body: JSON.stringify(payload)
     });
 
     if (res.ok) {
@@ -554,18 +884,21 @@ function resetCurrentWorksheet() {
   const secName = (appData.sectors[currentSector] && appData.sectors[currentSector].short_name) || currentSector.toUpperCase();
 
   currentResponses = {
-    table_number: "",
+    participant_name: currentParticipant || "",
+    table_number: currentParticipant || "",
     answers: {}
   };
-  localStorage.removeItem(`cppr_responses_${currentSector}`);
+  const storageKey = getStorageKey(currentSector, currentParticipant);
+  localStorage.removeItem(storageKey);
   const tableInput = document.getElementById("table-num");
-  if (tableInput) tableInput.value = "";
+  if (tableInput) tableInput.value = currentResponses.table_number || "";
 
   renderCards(appData.sectors[currentSector]);
   updateProgress();
   submitResponses(false);
 
-  showToast(`Worksheet for ${secName} cleared to blank!`, false);
+  const displayName = currentParticipant ? `${currentParticipant} (${secName})` : secName;
+  showToast(`Worksheet for ${displayName} cleared to blank!`, false);
 }
 
 function setSyncStatus(text, color) {
@@ -611,28 +944,33 @@ function generateClientExcel(sector) {
   const secData = appData.sectors[sector];
   const rows = [
     ["CPPR EQUITY BUDGETING WORKSHOP - COMPLETED PARTICIPANT WORKSHEET"],
-    ["Department / Sector:", secData.display_title],
-    ["Table / Team Identifier:", currentResponses.table_number || "Unassigned"],
-    ["Timestamp:", new Date().toLocaleString()],
-    [],
-    [
-      "Card #",
-      "Indicator ID",
-      "Budget Stage",
-      "Framework Indicator Question",
-      "Assigned PDF Searched",
-      "Dual Page Reference",
-      "Transcribed Verbatim Evidence & Amounts",
-      "Gender",
-      "Age",
-      "Ethnicity/Merged",
-      "Religion",
-      "Disability",
-      "Culture",
-      "Status Assessment",
-      "Analytical Rationale / Policy Implication"
-    ]
+    ["Department / Sector:", secData.display_title]
   ];
+
+  if (currentParticipant) {
+    rows.push(["Participant Name:", currentParticipant]);
+  }
+
+  rows.push(["Table / Team Identifier:", currentResponses.table_number || "Unassigned"]);
+  rows.push(["Timestamp:", new Date().toLocaleString()]);
+  rows.push([]);
+  rows.push([
+    "Card #",
+    "Indicator ID",
+    "Budget Stage",
+    "Framework Indicator Question",
+    "Assigned PDF Searched",
+    "Dual Page Reference",
+    "Transcribed Verbatim Evidence & Amounts",
+    "Gender",
+    "Age",
+    "Ethnicity/Merged",
+    "Religion",
+    "Disability",
+    "Culture",
+    "Status Assessment",
+    "Analytical Rationale / Policy Implication"
+  ]);
 
   secData.cards.forEach((card, idx) => {
     const ans = currentResponses.answers[card.id] || {};
@@ -659,7 +997,10 @@ function generateClientExcel(sector) {
   const ws = XLSX.utils.aoa_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Completed Worksheet");
-  XLSX.writeFile(wb, `${sector}_Completed_Workbook.xlsx`);
+  const filename = currentParticipant 
+    ? `${sector}_${sanitizeParticipantKey(currentParticipant)}_Completed_Workbook.xlsx`
+    : `${sector}_Completed_Workbook.xlsx`;
+  XLSX.writeFile(wb, filename);
   showToast("📥 Excel Workbook downloaded successfully!", false);
 }
 
@@ -681,6 +1022,9 @@ function generateClientWord(sector) {
 
   html += `<h1>CPPR EQUITY BUDGETING WORKSHOP</h1>`;
   html += `<p><strong>Department:</strong> ${secData.display_title}<br>`;
+  if (currentParticipant) {
+    html += `<strong>Participant Name:</strong> ${escapeHtml(currentParticipant)}<br>`;
+  }
   html += `<strong>Table Identifier:</strong> ${escapeHtml(currentResponses.table_number || "Unassigned")}<br>`;
   html += `<strong>Submission Date:</strong> ${new Date().toLocaleString()}</p><hr>`;
 
@@ -706,7 +1050,10 @@ function generateClientWord(sector) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${sector}_Completed_Worksheet.doc`;
+  const filename = currentParticipant
+    ? `${sector}_${sanitizeParticipantKey(currentParticipant)}_Completed_Worksheet.doc`
+    : `${sector}_Completed_Worksheet.doc`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
   showToast("📄 Word Document downloaded successfully!", false);
@@ -868,10 +1215,10 @@ async function refreshAdminData() {
   let sectorResets = JSON.parse(localStorage.getItem("cppr_sector_resets") || "{}");
 
   const newCache = {
-    health: { sector: "health", completed_count: 0, answers: {} },
-    local: { sector: "local", completed_count: 0, answers: {} },
-    education: { sector: "education", completed_count: 0, answers: {} },
-    finance: { sector: "finance", completed_count: 0, answers: {} }
+    health: { sector: "health", completed_count: 0, answers: {}, participants: {} },
+    local: { sector: "local", completed_count: 0, answers: {}, participants: {} },
+    education: { sector: "education", completed_count: 0, answers: {}, participants: {} },
+    finance: { sector: "finance", completed_count: 0, answers: {}, participants: {} }
   };
 
   // 1. Try local or serverless API
@@ -879,7 +1226,14 @@ async function refreshAdminData() {
     const res = await fetch("api/submissions");
     if (res.ok) {
       const submissions = await res.json();
-      Object.assign(newCache, submissions);
+      Object.keys(submissions).forEach(k => {
+        if (newCache[k]) {
+          newCache[k] = { ...newCache[k], ...submissions[k] };
+          if (submissions[k].participants) {
+            newCache[k].participants = { ...submissions[k].participants };
+          }
+        }
+      });
     }
   } catch (err) {}
 
@@ -926,21 +1280,73 @@ async function refreshAdminData() {
             if (parsed.sector && sectorResets[parsed.sector] && msgTimeMs <= sectorResets[parsed.sector]) return;
 
             if (parsed.sector && parsed.answers !== undefined) {
-              newCache[parsed.sector] = {
-                sector: parsed.sector,
-                table_number: parsed.table_number,
-                completed_count: parsed.completed_count || 0,
-                total_count: 14,
-                completion_pct: Math.round(((parsed.completed_count || 0) / 14) * 100),
-                last_saved: parsed.last_saved,
-                answers: parsed.answers || {}
-              };
+              const sec = parsed.sector;
+              if (!newCache[sec]) {
+                newCache[sec] = { sector: sec, completed_count: 0, answers: {}, participants: {} };
+              }
+              if (!newCache[sec].participants) {
+                newCache[sec].participants = {};
+              }
+
+              if (parsed.participant_name && parsed.participant_name.trim()) {
+                const pName = parsed.participant_name.trim();
+                newCache[sec].participants[pName] = {
+                  participant_name: pName,
+                  table_number: parsed.table_number || "",
+                  completed_count: parsed.completed_count || 0,
+                  total_count: 14,
+                  completion_pct: Math.round(((parsed.completed_count || 0) / 14) * 100),
+                  last_saved: parsed.last_saved || "",
+                  answers: parsed.answers || {}
+                };
+              } else {
+                newCache[sec].table_number = parsed.table_number;
+                newCache[sec].completed_count = parsed.completed_count || 0;
+                newCache[sec].total_count = 14;
+                newCache[sec].completion_pct = Math.round(((parsed.completed_count || 0) / 14) * 100);
+                newCache[sec].last_saved = parsed.last_saved;
+                newCache[sec].answers = parsed.answers || {};
+              }
             }
           }
         } catch(e) {}
       });
     }
   } catch (err) {}
+
+  // Pass 3: Check localStorage for any participant progress on this machine
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("cppr_user_responses_")) {
+      try {
+        const parts = k.replace("cppr_user_responses_", "").split("_");
+        const sec = parts[parts.length - 1];
+        if (newCache[sec]) {
+          const val = JSON.parse(localStorage.getItem(k));
+          const pName = val.participant_name || (parts.slice(0, parts.length - 1).join(" "));
+          if (pName) {
+            newCache[sec].participants = newCache[sec].participants || {};
+            if (!newCache[sec].participants[pName]) {
+              let count = 0;
+              for (const cid in (val.answers || {})) {
+                const a = val.answers[cid];
+                if (a && a.status && a.evidence && a.evidence.trim().length > 0) count++;
+              }
+              newCache[sec].participants[pName] = {
+                participant_name: pName,
+                table_number: val.table_number || "",
+                completed_count: count,
+                total_count: 14,
+                completion_pct: Math.round((count / 14) * 100),
+                last_saved: val.last_saved || "Saved on Device",
+                answers: val.answers || {}
+              };
+            }
+          }
+        }
+      } catch(e) {}
+    }
+  }
 
   adminSubmissionsCache = newCache;
   renderAdminTeams(adminSubmissionsCache);
@@ -956,11 +1362,22 @@ function resetAllSubmissions() {
   localStorage.removeItem("cppr_responses_education");
   localStorage.removeItem("cppr_responses_finance");
 
+  // Clean local user responses
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("cppr_user_responses_")) {
+      keysToRemove.push(k);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem("cppr_participants_registry");
+
   adminSubmissionsCache = {
-    health: { sector: "health", completed_count: 0, answers: {} },
-    local: { sector: "local", completed_count: 0, answers: {} },
-    education: { sector: "education", completed_count: 0, answers: {} },
-    finance: { sector: "finance", completed_count: 0, answers: {} }
+    health: { sector: "health", completed_count: 0, answers: {}, participants: {} },
+    local: { sector: "local", completed_count: 0, answers: {}, participants: {} },
+    education: { sector: "education", completed_count: 0, answers: {}, participants: {} },
+    finance: { sector: "finance", completed_count: 0, answers: {}, participants: {} }
   };
 
   renderAdminTeams(adminSubmissionsCache);
@@ -1007,7 +1424,16 @@ function resetSingleSector(sector) {
   localStorage.setItem("cppr_sector_resets", JSON.stringify(sectorResets));
   localStorage.removeItem(`cppr_responses_${sector}`);
 
-  adminSubmissionsCache[sector] = { sector: sector, completed_count: 0, answers: {} };
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith("cppr_user_responses_") && k.endsWith(`_${sector}`)) {
+      keysToRemove.push(k);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  adminSubmissionsCache[sector] = { sector: sector, completed_count: 0, answers: {}, participants: {} };
   renderAdminTeams(adminSubmissionsCache);
   renderAdminComparison();
 
@@ -1055,6 +1481,37 @@ function renderAdminTeams(submissions) {
       statusBadge = `<span class="admin-status-badge" style="background:#ecfdf5; color:#065f46;">✓ Complete (100%)</span>`;
     }
 
+    const participantsMap = sub.participants || {};
+    const participantsList = Object.values(participantsMap);
+
+    let participantsListHtml = "";
+    if (participantsList.length === 0) {
+      participantsListHtml = `<div class="admin-participant-empty">No individual participants recorded yet</div>`;
+    } else {
+      participantsListHtml = participantsList.map(p => {
+        const pCount = p.completed_count || 0;
+        const pPct = p.completion_pct || Math.round((pCount / 14) * 100);
+        let badgeStyle = "background:#f1f5f9; color:#64748b;";
+        if (pPct === 100) badgeStyle = "background:#dcfce7; color:#166534;";
+        else if (pCount > 0) badgeStyle = "background:#fef3c7; color:#92400e;";
+
+        return `
+          <div class="admin-participant-row">
+            <div>
+              <span class="admin-participant-name">👤 ${escapeHtml(p.participant_name)}</span>
+              <span style="color: var(--text-muted); font-size: 0.72rem; margin-left: 0.35rem;">(${escapeHtml(p.table_number || 'No table')})</span>
+            </div>
+            <div class="admin-participant-meta">
+              <span class="admin-participant-prog" style="${badgeStyle}">
+                ${pCount}/14 (${pPct}%)
+              </span>
+              <button class="btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.72rem; font-weight:700;" onclick="viewParticipantWorksheet('${key}', '${escapeHtml(p.participant_name)}')">👁️ Inspect</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
     const card = document.createElement("div");
     card.className = "admin-card";
     card.innerHTML = `
@@ -1073,6 +1530,14 @@ function renderAdminTeams(submissions) {
       <div class="progress-track" style="margin: 0.75rem 0;">
         <div class="progress-fill" style="width: ${pct}%;"></div>
       </div>
+      <div class="admin-participants-box">
+        <div class="admin-participants-heading">
+          <span>👥 Submitting Participants (${participantsList.length})</span>
+        </div>
+        <div class="admin-participants-list">
+          ${participantsListHtml}
+        </div>
+      </div>
       <div class="admin-card-actions">
         <button class="btn-sm" style="flex:1;" onclick="openSector('${key}')">👁️ View</button>
         <button class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'xlsx')">📥 Excel</button>
@@ -1082,6 +1547,12 @@ function renderAdminTeams(submissions) {
     `;
     grid.appendChild(card);
   });
+}
+
+function viewParticipantWorksheet(secKey, participantName) {
+  currentParticipant = participantName;
+  sessionStorage.setItem("cppr_participant_name", participantName);
+  openSector(secKey);
 }
 
 function exportResponsesForSector(key, fmt) {

@@ -945,3 +945,215 @@ body {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Participant Portal Styles */
+.participant-sectors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1.25rem;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .participant-sectors-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.participant-dept-card {
+  background: #ffffff;
+  border: 2px solid var(--border-light);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.participant-dept-card:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(31, 78, 121, 0.12);
+}
+
+.participant-dept-card.active-progress {
+  border-color: #93c5fd;
+  background: #f0f7ff;
+}
+
+.participant-dept-card.complete-progress {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.dept-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dept-card-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.dept-card-info {
+  flex: 1;
+}
+
+.dept-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  margin-bottom: 0.2rem;
+}
+
+.dept-card-scope {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.dept-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.dept-card-status-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 1rem;
+  display: inline-block;
+}
+
+.dept-card-status-badge.not-started {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.dept-card-status-badge.in-progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.dept-card-status-badge.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.dept-card-action-btn {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.participant-dept-card:hover .dept-card-action-btn {
+  text-decoration: underline;
+}
+
+.participant-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1.5px solid #bae6fd;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 0.75rem;
+}
+
+.recent-participant-chip {
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: 2rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.recent-participant-chip:hover {
+  background: #eff6ff;
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.admin-participants-box {
+  margin-top: 0.75rem;
+  border-top: 1px dashed var(--border-light);
+  padding-top: 0.65rem;
+}
+
+.admin-participants-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 0.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-participants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.admin-participant-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.admin-participant-name {
+  font-weight: 700;
+  color: var(--primary-navy);
+}
+
+.admin-participant-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-participant-prog {
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.75rem;
+  font-size: 0.72rem;
+}
+
+.admin-participant-empty {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 0.25rem 0;
+}
+
