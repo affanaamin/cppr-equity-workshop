@@ -60,7 +60,7 @@ function normalizeSectorCode(raw) {
   if (s === "local" || s === "local government" || s === "lg" || s === "2" || s === "team 2" || s === "l") return "local";
   if (s === "education" || s === "edu" || s === "3" || s === "team 3" || s === "e") return "education";
   if (s === "finance" || s === "planning" || s === "pfm" || s === "4" || s === "team 4" || s === "f") return "finance";
-  if (s === "admin" || s === "facilitator" || s === "monitor") return "admin";
+  if (s === "admin" || s === "facilitator" || s === "monitor" || s === "affan") return "admin";
   return null;
 }
 
