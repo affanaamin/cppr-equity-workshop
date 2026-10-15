@@ -17,7 +17,7 @@ let isFacilitatorInspectMode = false;
 let currentInspectorTarget = null;
 let customDriveFolder = localStorage.getItem("cppr_drive_folder") || "";
 
-// Department Lock State (Default: open for individual participants)
+// Department Lock State (Default: completely open for individual participants)
 let sectorLocks = {
   health: false,
   local: false,
@@ -26,8 +26,11 @@ let sectorLocks = {
 };
 
 function initSectorLocks() {
+  sectorLocks = { health: false, local: false, education: false, finance: false };
   try {
-    const saved = localStorage.getItem("cppr_sector_locks");
+    // Purge any stale legacy lock states
+    localStorage.removeItem("cppr_sector_locks");
+    const saved = localStorage.getItem("cppr_sector_locks_v2");
     if (saved) {
       sectorLocks = { ...sectorLocks, ...JSON.parse(saved) };
     }
@@ -63,7 +66,7 @@ function setAllDepartmentLocks(lockState) {
 }
 
 function saveAndBroadcastLocks() {
-  localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+  localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
   updateAdminLockSummaryText();
 
   // 1. Broadcast to cloud sync (ntfy.sh) so all devices receive lock updates immediately
@@ -191,11 +194,15 @@ function startParticipantLockPoller() {
             if (item.event === "message" && item.message) {
               const parsed = JSON.parse(item.message);
               if (parsed.action === "LOCK_STATE" && parsed.locks) {
+                // Reject stale messages older than 2 minutes
+                if (parsed.time && (Date.now() - parsed.time > 120000)) {
+                  return;
+                }
                 const prev = JSON.stringify(sectorLocks);
                 const next = JSON.stringify(parsed.locks);
                 if (prev !== next) {
                   sectorLocks = { ...sectorLocks, ...parsed.locks };
-                  localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+                  localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
                   hadLockChange = true;
                 }
               }
