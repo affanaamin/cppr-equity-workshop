@@ -17,12 +17,12 @@ let isFacilitatorInspectMode = false;
 let currentInspectorTarget = null;
 let customDriveFolder = localStorage.getItem("cppr_drive_folder") || "";
 
-// Department Lock State (Default: all 4 departments locked)
+// Department Lock State (Default: open for individual participants)
 let sectorLocks = {
-  health: true,
-  local: true,
-  education: true,
-  finance: true
+  health: false,
+  local: false,
+  education: false,
+  finance: false
 };
 
 function initSectorLocks() {
@@ -30,8 +30,6 @@ function initSectorLocks() {
     const saved = localStorage.getItem("cppr_sector_locks");
     if (saved) {
       sectorLocks = { ...sectorLocks, ...JSON.parse(saved) };
-    } else {
-      localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
     }
   } catch(e) {}
 }
@@ -103,30 +101,59 @@ function updateAdminLockSummaryText() {
   if (lockedCount === 4) {
     summaryEl.innerHTML = `<span style="color:#991b1b; font-weight:700;">🔒 All 4 departments are currently LOCKED</span> (Participants cannot enter or submit).`;
   } else if (lockedCount === 0) {
-    summaryEl.innerHTML = `<span style="color:#166534; font-weight:700;">🔓 All 4 departments are UNLOCKED</span> (Participants can work freely).`;
+    summaryEl.innerHTML = `<span style="color:#166534; font-weight:700;">🔓 All 4 departments are UNLOCKED for Individual Evaluations</span>.`;
   } else {
-    summaryEl.innerHTML = `<span style="color:#92400e; font-weight:700;">⚠️ ${lockedCount} of 4 departments LOCKED</span>, ${4 - lockedCount} unlocked.`;
+    summaryEl.innerHTML = `<span style="color:#92400e; font-weight:700;">⚠️ ${lockedCount} of 4 departments LOCKED</span>, ${4 - lockedCount} open for individuals.`;
   }
 }
 
 function applyWorksheetLockState(secKey) {
+  const banner = document.getElementById("worksheet-locked-banner");
+  const bannerText = document.getElementById("worksheet-locked-banner-text");
+
   if (isFacilitatorInspectMode) {
-    const banner = document.getElementById("worksheet-locked-banner");
     if (banner) banner.style.display = "none";
     return;
   }
+
+  // Case 1: Departmental / Group Master View (no participant)
+  // Individuals can do it, but they CANNOT edit the departmental ones!
+  if (!currentParticipant) {
+    if (banner) {
+      banner.style.display = "flex";
+      if (bannerText) {
+        bannerText.innerHTML = `<span>🔒 <strong>DEPARTMENTAL MASTER VIEW (Read-Only):</strong> Individuals cannot edit the shared departmental worksheet directly. <button type="button" class="btn-sm" style="background:#ffffff; color:#991b1b; font-weight:800; border:none; margin-left:0.5rem; padding:0.2rem 0.6rem; cursor:pointer;" onclick="logoutSector()">Enter Your Name to Edit Your Own ➔</button></span>`;
+      }
+    }
+
+    const inputs = document.querySelectorAll("#cards-container input, #cards-container select, #cards-container textarea, #table-num");
+    inputs.forEach(el => {
+      el.disabled = true;
+      el.style.opacity = "0.7";
+      el.style.cursor = "not-allowed";
+    });
+
+    const submitBtn = document.querySelector("#worksheet-view .btn-success");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = "0.4";
+      submitBtn.style.cursor = "not-allowed";
+      submitBtn.title = "Departmental master view is read-only. Enter your name to submit your own evaluation.";
+    }
+    return;
+  }
+
+  // Case 2: Individual Participant View (currentParticipant is set)
+  // Individuals CAN edit their own, unless facilitator live-locks this department
   const isLocked = isSectorLocked(secKey);
-  const banner = document.getElementById("worksheet-locked-banner");
   if (banner) {
     banner.style.display = isLocked ? "flex" : "none";
-    const bannerText = document.getElementById("worksheet-locked-banner-text");
     if (bannerText) {
       const secTitle = (appData && appData.sectors[secKey]) ? appData.sectors[secKey].display_title : secKey.toUpperCase();
-      bannerText.textContent = `${secTitle} is currently LOCKED by the Facilitator. Submissions and editing are paused.`;
+      bannerText.textContent = `${secTitle} has been temporarily paused by the Facilitator. Your saved progress is preserved.`;
     }
   }
 
-  // Toggle all input fields
   const inputs = document.querySelectorAll("#cards-container input, #cards-container select, #cards-container textarea, #table-num");
   inputs.forEach(el => {
     el.disabled = isLocked;
@@ -144,6 +171,7 @@ function applyWorksheetLockState(secKey) {
     submitBtn.disabled = isLocked;
     submitBtn.style.opacity = isLocked ? "0.5" : "1";
     submitBtn.style.cursor = isLocked ? "not-allowed" : "pointer";
+    submitBtn.title = isLocked ? "Submissions paused by facilitator" : "Submit complete worksheet to facilitator";
   }
 }
 
@@ -345,8 +373,11 @@ function handleLoginSubmit(e) {
     sessionStorage.removeItem("cppr_participant_name");
     openAdmin();
   } else if (norm && appData.sectors[norm]) {
-    if (isSectorLocked(norm)) {
-      showToast(`🔒 ${appData.sectors[norm].display_title} is currently locked by the Facilitator.`, true);
+    // Participant typed sector code: guide them to enter their name so they can edit their own
+    const promptName = prompt(`You selected ${appData.sectors[norm].display_title}.\nEnter your Name to evaluate on your own:\n(Note: Departmental master view is read-only)`);
+    if (promptName && promptName.trim().length >= 2) {
+      showParticipantPicker(promptName.trim());
+      selectParticipantSector(norm);
       return;
     }
     currentParticipant = null;
@@ -367,14 +398,25 @@ function handleLoginSubmit(e) {
 function quickSelectSector(secCode) {
   if (secCode === "admin") {
     openAdmin();
-  } else if (isSectorLocked(secCode)) {
-    const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
-    showToast(`🔒 ${secName} is currently locked by the Facilitator.`, true);
   } else if (currentParticipant) {
     // Route through participant sector selection so progress is tracked
     selectParticipantSector(secCode);
   } else {
-    openSector(secCode);
+    // Check if input has a name typed
+    const inputVal = (document.getElementById("sector-input")?.value || "").trim();
+    if (inputVal.length >= 2 && !normalizeSectorCode(inputVal)) {
+      showParticipantPicker(inputVal);
+      selectParticipantSector(secCode);
+      return;
+    }
+    const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
+    const promptName = prompt(`You selected ${secName}.\nEnter your Name to start your own evaluation:\n(Note: Departmental master view is read-only)`);
+    if (promptName && promptName.trim().length >= 2) {
+      showParticipantPicker(promptName.trim());
+      selectParticipantSector(secCode);
+    } else {
+      openSector(secCode);
+    }
   }
 }
 
@@ -1068,6 +1110,14 @@ function triggerAutoSave() {
 
 async function submitResponses(isExplicitSubmit) {
   if (!currentSector) return;
+
+  if (!currentParticipant && !isFacilitatorInspectMode) {
+    if (isExplicitSubmit) {
+      showToast("🔒 Departmental master view is read-only. Enter your name to edit and submit your own.", true);
+    }
+    return;
+  }
+
   if (isSectorLocked(currentSector)) {
     if (isExplicitSubmit) {
       showToast(`🔒 Submissions are paused. This department is currently locked by the Facilitator.`, true);
@@ -1160,6 +1210,12 @@ async function submitResponses(isExplicitSubmit) {
 
 function resetCurrentWorksheet() {
   if (!currentSector) return;
+
+  if (!currentParticipant && !isFacilitatorInspectMode) {
+    showToast("🔒 Departmental master worksheet cannot be cleared by participants. Enter your name to manage your own worksheet.", true);
+    return;
+  }
+
   const secName = (appData.sectors[currentSector] && appData.sectors[currentSector].short_name) || currentSector.toUpperCase();
 
   currentResponses = {

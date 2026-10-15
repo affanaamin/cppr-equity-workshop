@@ -237,7 +237,7 @@ async def get_locks():
                 return json.load(f)
         except Exception:
             pass
-    return {"health": True, "local": True, "education": True, "finance": True}
+    return {"health": False, "local": False, "education": False, "finance": False}
 
 @app.post("/api/locks")
 async def update_locks(request: Request):
