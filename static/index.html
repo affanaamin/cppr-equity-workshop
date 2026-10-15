@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="style.css?v=20261015-1635">
+  <link rel="stylesheet" href="style.css?v=20261015-1645">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 </head>
 <body>
@@ -36,11 +36,11 @@
       
       <p class="login-hint">Type your individual name in the bar above to begin your evaluation and save progress.</p>
 
-      <div class="login-pills">
-        <button type="button" class="quick-pill" onclick="quickSelectSector('health')" title="Direct access locked - Enter your name above">🔒 🏥 Health</button>
-        <button type="button" class="quick-pill" onclick="quickSelectSector('local')" title="Direct access locked - Enter your name above">🔒 🏛️ Local Gov</button>
-        <button type="button" class="quick-pill" onclick="quickSelectSector('education')" title="Direct access locked - Enter your name above">🔒 🎓 Education</button>
-        <button type="button" class="quick-pill" onclick="quickSelectSector('finance')" title="Direct access locked - Enter your name above">🔒 💼 Finance & Planning</button>
+      <div class="login-pills" id="login-pills-container">
+        <button type="button" class="quick-pill" id="pill-health" onclick="quickSelectSector('health')">🏥 Health</button>
+        <button type="button" class="quick-pill" id="pill-local" onclick="quickSelectSector('local')">🏛️ Local Gov</button>
+        <button type="button" class="quick-pill" id="pill-education" onclick="quickSelectSector('education')">🎓 Education</button>
+        <button type="button" class="quick-pill" id="pill-finance" onclick="quickSelectSector('finance')">💼 Finance & Planning</button>
       </div>
 
       <!-- Saved / Recent Participants on this browser -->
@@ -334,7 +334,7 @@
   <div id="toast" class="toast-notice">Notice</div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=20261015-1635"></script>
+  <script src="app.js?v=20261015-1645"></script>
   <script>
     // Fallback if cached app.js exists
     window.addEventListener('error', function(e) {

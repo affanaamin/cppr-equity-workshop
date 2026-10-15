@@ -40,6 +40,7 @@ function initSectorLocks() {
       latestLockTimestamp = parseInt(savedTs, 10);
     }
   } catch(e) {}
+  updateLoginPillsLockState();
 }
 
 function isSectorLocked(secKey) {
@@ -77,6 +78,7 @@ function setAllDepartmentLocks(lockState) {
 function saveAndBroadcastLocks() {
   localStorage.setItem("cppr_sector_locks_v2", JSON.stringify(sectorLocks));
   updateAdminLockSummaryText();
+  updateLoginPillsLockState();
 
   // 1. Broadcast to cloud sync (ntfy.sh) so all devices receive lock updates immediately
   try {
@@ -117,6 +119,35 @@ function updateAdminLockSummaryText() {
   } else {
     summaryEl.innerHTML = `<span style="color:#92400e; font-weight:700;">⚠️ ${lockedCount} of 4 departments LOCKED</span>, ${4 - lockedCount} open for individuals.`;
   }
+}
+
+function updateLoginPillsLockState() {
+  const secMeta = [
+    { key: "health", icon: "🏥", name: "Health" },
+    { key: "local", icon: "🏛️", name: "Local Gov" },
+    { key: "education", icon: "🎓", name: "Education" },
+    { key: "finance", icon: "💼", name: "Finance & Planning" }
+  ];
+
+  secMeta.forEach(item => {
+    const btn = document.getElementById(`pill-${item.key}`);
+    if (btn) {
+      const locked = isSectorLocked(item.key);
+      if (locked) {
+        btn.innerHTML = `🔒 ${item.icon} ${item.name}`;
+        btn.style.borderColor = "#fca5a5";
+        btn.style.background = "#fee2e2";
+        btn.style.color = "#991b1b";
+        btn.title = `${item.name} is LOCKED by the Facilitator`;
+      } else {
+        btn.innerHTML = `${item.icon} ${item.name}`;
+        btn.style.borderColor = "";
+        btn.style.background = "";
+        btn.style.color = "";
+        btn.title = `Select ${item.name}`;
+      }
+    }
+  });
 }
 
 function applyWorksheetLockState(secKey) {
@@ -348,11 +379,10 @@ function checkUrlOrStorageLogin() {
       openAdmin();
       return;
     } else if (norm && appData.sectors[norm]) {
-      if (currentParticipant) {
+      if (!isSectorLocked(norm)) {
         openSector(norm);
         return;
       } else {
-        // Direct departmental access without individual participant name is locked!
         showLoginView();
         return;
       }
@@ -361,7 +391,7 @@ function checkUrlOrStorageLogin() {
 
   // Check saved session
   const savedSector = sessionStorage.getItem("cppr_active_sector");
-  if (savedSector && appData.sectors[savedSector] && currentParticipant) {
+  if (savedSector && appData.sectors[savedSector] && !isSectorLocked(savedSector)) {
     openSector(savedSector);
   } else if (currentParticipant) {
     showParticipantPicker(currentParticipant);
@@ -405,19 +435,18 @@ function handleLoginSubmit(e) {
   }
 
   if (norm && appData.sectors[norm]) {
-    // Participant typed a department name directly into the bar instead of their name!
-    const secName = appData.sectors[norm].display_title;
-    showToast(`🔒 Direct access to ${secName} is locked! Please enter your individual name (e.g. Dr. Tariq) in the bar above.`, true);
-    inputEl.value = "";
-    inputEl.placeholder = "Enter your individual name (not department)...";
-    inputEl.style.borderColor = "#ef4444";
-    inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
-    inputEl.focus();
-    setTimeout(() => {
-      inputEl.style.borderColor = "";
-      inputEl.style.boxShadow = "";
-      inputEl.placeholder = "Enter your Name (e.g. Dr. Tariq, sheraz)...";
-    }, 2500);
+    // Participant entered department code
+    if (isSectorLocked(norm)) {
+      showToast(`🔒 ${appData.sectors[norm].display_title} is currently LOCKED by the Facilitator. Submissions and access are paused.`, true);
+      inputEl.style.borderColor = "#ef4444";
+      inputEl.focus();
+      setTimeout(() => { inputEl.style.borderColor = ""; }, 1500);
+      return;
+    }
+    // Department is UNLOCKED: open departmental master view in read-only mode
+    currentParticipant = null;
+    sessionStorage.removeItem("cppr_participant_name");
+    openSector(norm);
     return;
   }
 
@@ -440,13 +469,32 @@ function quickSelectSector(secCode) {
     return;
   }
 
-  // If a participant is already logged in
+  const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
+
+  // 1. If department is LOCKED by Facilitator in Admin
+  if (isSectorLocked(secCode)) {
+    showToast(`🔒 ${secName} is currently LOCKED by the Facilitator. Submissions and access are paused.`, true);
+    const inputEl = document.getElementById("sector-input");
+    if (inputEl) {
+      inputEl.style.borderColor = "#ef4444";
+      inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
+      inputEl.focus();
+      setTimeout(() => {
+        inputEl.style.borderColor = "";
+        inputEl.style.boxShadow = "";
+      }, 1500);
+    }
+    return;
+  }
+
+  // 2. Department is UNLOCKED!
+  // If participant is already logged in
   if (currentParticipant) {
     selectParticipantSector(secCode);
     return;
   }
 
-  // Check if participant has already typed their name in the input bar
+  // Check if participant has typed their name in the input bar
   const inputEl = document.getElementById("sector-input");
   const inputVal = (inputEl?.value || "").trim();
   const norm = normalizeSectorCode(inputVal);
@@ -458,18 +506,10 @@ function quickSelectSector(secCode) {
     return;
   }
 
-  // Otherwise: SAY NO! Direct departmental access is locked!
-  const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
-  showToast(`🔒 ${secName} is locked! You cannot open departments directly. Please enter your name in the input bar above.`, true);
-  if (inputEl) {
-    inputEl.style.borderColor = "#ef4444";
-    inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
-    inputEl.focus();
-    setTimeout(() => {
-      inputEl.style.borderColor = "";
-      inputEl.style.boxShadow = "";
-    }, 1800);
-  }
+  // If no name was entered, open the Departmental Master View (Read-Only)
+  currentParticipant = null;
+  sessionStorage.removeItem("cppr_participant_name");
+  openSector(secCode);
 }
 
 function showParticipantPicker(participantName) {
@@ -636,6 +676,7 @@ function showLoginView() {
   const inputEl = document.getElementById("sector-input");
   inputEl.value = "";
   renderRecentParticipantsList();
+  updateLoginPillsLockState();
   setTimeout(() => inputEl.focus(), 100);
 }
 
@@ -662,8 +703,9 @@ function logoutSector() {
 
 // Open Specific Sector Worksheet
 async function openSector(secKey) {
-  if (!currentParticipant && !isFacilitatorInspectMode) {
-    showToast("🔒 Direct departmental access is locked. Please enter your name in the input bar to begin.", true);
+  if (isSectorLocked(secKey) && !isFacilitatorInspectMode) {
+    const secName = (appData && appData.sectors[secKey]) ? appData.sectors[secKey].display_title : secKey.toUpperCase();
+    showToast(`🔒 ${secName} is currently LOCKED by the Facilitator. Submissions and access are paused.`, true);
     showLoginView();
     return;
   }
