@@ -101,6 +101,10 @@ function showLoginView() {
 }
 
 function logoutSector() {
+  if (adminPollInterval) {
+    clearInterval(adminPollInterval);
+    adminPollInterval = null;
+  }
   sessionStorage.removeItem("cppr_active_sector");
   window.history.pushState({}, "", window.location.pathname);
   showLoginView();
@@ -548,9 +552,6 @@ async function submitResponses(isExplicitSubmit) {
 function resetCurrentWorksheet() {
   if (!currentSector) return;
   const secName = (appData.sectors[currentSector] && appData.sectors[currentSector].short_name) || currentSector.toUpperCase();
-  if (!confirm(`Are you sure you want to clear this entire worksheet for ${secName} and start fresh?\n\nAll entered answers for this sector will be reset to blank.`)) {
-    return;
-  }
 
   currentResponses = {
     table_number: "",
@@ -560,11 +561,11 @@ function resetCurrentWorksheet() {
   const tableInput = document.getElementById("table-num");
   if (tableInput) tableInput.value = "";
 
-  renderIndicatorCards(appData.sectors[currentSector].cards);
-  updateProgressBar();
+  renderCards(appData.sectors[currentSector]);
+  updateProgress();
   submitResponses(false);
 
-  showToast(`Worksheet for ${secName} cleared. Ready to start again!`, false);
+  showToast(`Worksheet for ${secName} cleared to blank!`, false);
 }
 
 function setSyncStatus(text, color) {
@@ -947,35 +948,13 @@ async function refreshAdminData() {
   renderAdminComparison();
 }
 
-async function resetAllSubmissions() {
-  const confirmMsg = "Are you sure you want to reset ALL workshop submissions?\n\nThis will clear the dashboard progress bars across all 4 teams so participants can submit fresh.";
-  if (!confirm(confirmMsg)) return;
-
+function resetAllSubmissions() {
   const nowMs = Date.now();
   localStorage.setItem("cppr_admin_reset_time", nowMs.toString());
-
-  // Post reset event to ntfy cloud topic
-  try {
-    fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
-      method: "POST",
-      headers: {
-        "Title": "RESET: ALL TEAMS",
-        "Priority": "high",
-        "Tags": "wastebasket,warning",
-        "X-Action": "RESET_ALL"
-      },
-      body: JSON.stringify({
-        action: "RESET_ALL",
-        reset_time: nowMs,
-        time_str: new Date().toLocaleTimeString()
-      })
-    }).catch(e => console.log(e));
-  } catch(e) {}
-
-  // Post to local server if available
-  try {
-    await fetch("api/reset", { method: "POST" });
-  } catch(e) {}
+  localStorage.removeItem("cppr_responses_health");
+  localStorage.removeItem("cppr_responses_local");
+  localStorage.removeItem("cppr_responses_education");
+  localStorage.removeItem("cppr_responses_finance");
 
   adminSubmissionsCache = {
     health: { sector: "health", completed_count: 0, answers: {} },
@@ -986,24 +965,60 @@ async function resetAllSubmissions() {
 
   renderAdminTeams(adminSubmissionsCache);
   renderAdminComparison();
-  showToast("All dashboard submissions reset to 0%.", false);
+
+  // Direct DOM zeroing as safety guarantee
+  document.querySelectorAll(".progress-fill").forEach(el => el.style.width = "0%");
+  document.querySelectorAll(".admin-status-badge").forEach(el => {
+    el.textContent = "Not Started";
+    el.style.background = "#f1f5f9";
+    el.style.color = "#64748b";
+  });
+
+  showToast("All dashboard submissions reset to 0%!", false);
+
+  try {
+    fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
+      method: "POST",
+      headers: {
+        "Title": "RESET: ALL TEAMS",
+        "Priority": "urgent",
+        "Tags": "wastebasket,warning",
+        "X-Action": "RESET_ALL"
+      },
+      body: JSON.stringify({
+        action: "RESET_ALL",
+        reset_time: nowMs,
+        time_str: new Date().toLocaleTimeString()
+      })
+    }).catch(e => {});
+  } catch(e) {}
+
+  try {
+    fetch("api/reset", { method: "POST" }).catch(e => {});
+  } catch(e) {}
 }
 
-async function resetSingleSector(sector) {
+function resetSingleSector(sector) {
   const secName = (appData.sectors[sector] && appData.sectors[sector].short_name) || sector.toUpperCase();
-  if (!confirm(`Are you sure you want to reset submissions for ${secName}?`)) return;
-
   const nowMs = Date.now();
+
   let sectorResets = JSON.parse(localStorage.getItem("cppr_sector_resets") || "{}");
   sectorResets[sector] = nowMs;
   localStorage.setItem("cppr_sector_resets", JSON.stringify(sectorResets));
+  localStorage.removeItem(`cppr_responses_${sector}`);
+
+  adminSubmissionsCache[sector] = { sector: sector, completed_count: 0, answers: {} };
+  renderAdminTeams(adminSubmissionsCache);
+  renderAdminComparison();
+
+  showToast(`${secName} submissions reset to 0%!`, false);
 
   try {
     fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
       method: "POST",
       headers: {
         "Title": `RESET: ${sector.toUpperCase()}`,
-        "Priority": "high",
+        "Priority": "urgent",
         "Tags": "wastebasket",
         "X-Action": "RESET_SECTOR"
       },
@@ -1016,13 +1031,8 @@ async function resetSingleSector(sector) {
   } catch(e) {}
 
   try {
-    await fetch(`api/reset/${sector}`, { method: "POST" });
+    fetch(`api/reset/${sector}`, { method: "POST" }).catch(e => {});
   } catch(e) {}
-
-  adminSubmissionsCache[sector] = { sector: sector, completed_count: 0, answers: {} };
-  renderAdminTeams(adminSubmissionsCache);
-  renderAdminComparison();
-  showToast(`${secName} submissions reset to 0%.`, false);
 }
 
 function renderAdminTeams(submissions) {
