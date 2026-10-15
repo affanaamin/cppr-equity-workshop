@@ -12,13 +12,188 @@ let currentResponses = {
 };
 let saveTimeout = null;
 let adminPollInterval = null;
+let participantLockPollInterval = null;
 let isFacilitatorInspectMode = false;
 let currentInspectorTarget = null;
 let customDriveFolder = localStorage.getItem("cppr_drive_folder") || "";
 
+// Department Lock State (Default: all 4 departments locked)
+let sectorLocks = {
+  health: true,
+  local: true,
+  education: true,
+  finance: true
+};
+
+function initSectorLocks() {
+  try {
+    const saved = localStorage.getItem("cppr_sector_locks");
+    if (saved) {
+      sectorLocks = { ...sectorLocks, ...JSON.parse(saved) };
+    } else {
+      localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+    }
+  } catch(e) {}
+}
+
+function isSectorLocked(secKey) {
+  if (isFacilitatorInspectMode) return false; // Facilitator is never locked out
+  if (!secKey) return false;
+  return Boolean(sectorLocks[secKey]);
+}
+
+function toggleSectorLock(secKey) {
+  if (!sectorLocks.hasOwnProperty(secKey)) return;
+  const newStatus = !sectorLocks[secKey];
+  sectorLocks[secKey] = newStatus;
+  saveAndBroadcastLocks();
+  renderAdminTeams(adminSubmissionsCache);
+  const secName = (appData && appData.sectors[secKey] && appData.sectors[secKey].short_name) || secKey.toUpperCase();
+  showToast(`${secName} is now ${newStatus ? '🔒 LOCKED' : '🔓 UNLOCKED'}!`, false);
+}
+
+function setAllDepartmentLocks(lockState) {
+  sectorLocks = {
+    health: lockState,
+    local: lockState,
+    education: lockState,
+    finance: lockState
+  };
+  saveAndBroadcastLocks();
+  renderAdminTeams(adminSubmissionsCache);
+  showToast(`All 4 departments are now ${lockState ? '🔒 LOCKED' : '🔓 UNLOCKED'}!`, false);
+}
+
+function saveAndBroadcastLocks() {
+  localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+  updateAdminLockSummaryText();
+
+  // 1. Broadcast to cloud sync (ntfy.sh) so all devices receive lock updates immediately
+  try {
+    fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
+      method: "POST",
+      headers: {
+        "Title": "LOCK_UPDATE",
+        "Priority": "urgent",
+        "Tags": "lock",
+        "X-Action": "LOCK_STATE"
+      },
+      body: JSON.stringify({
+        action: "LOCK_STATE",
+        locks: sectorLocks,
+        time: Date.now()
+      })
+    }).catch(e => {});
+  } catch(e) {}
+
+  // 2. Broadcast to local server if running
+  try {
+    fetch("api/locks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sectorLocks)
+    }).catch(e => {});
+  } catch(e) {}
+}
+
+function updateAdminLockSummaryText() {
+  const summaryEl = document.getElementById("admin-lock-summary-text");
+  if (!summaryEl) return;
+  const lockedCount = Object.values(sectorLocks).filter(Boolean).length;
+  if (lockedCount === 4) {
+    summaryEl.innerHTML = `<span style="color:#991b1b; font-weight:700;">🔒 All 4 departments are currently LOCKED</span> (Participants cannot enter or submit).`;
+  } else if (lockedCount === 0) {
+    summaryEl.innerHTML = `<span style="color:#166534; font-weight:700;">🔓 All 4 departments are UNLOCKED</span> (Participants can work freely).`;
+  } else {
+    summaryEl.innerHTML = `<span style="color:#92400e; font-weight:700;">⚠️ ${lockedCount} of 4 departments LOCKED</span>, ${4 - lockedCount} unlocked.`;
+  }
+}
+
+function applyWorksheetLockState(secKey) {
+  if (isFacilitatorInspectMode) {
+    const banner = document.getElementById("worksheet-locked-banner");
+    if (banner) banner.style.display = "none";
+    return;
+  }
+  const isLocked = isSectorLocked(secKey);
+  const banner = document.getElementById("worksheet-locked-banner");
+  if (banner) {
+    banner.style.display = isLocked ? "flex" : "none";
+    const bannerText = document.getElementById("worksheet-locked-banner-text");
+    if (bannerText) {
+      const secTitle = (appData && appData.sectors[secKey]) ? appData.sectors[secKey].display_title : secKey.toUpperCase();
+      bannerText.textContent = `${secTitle} is currently LOCKED by the Facilitator. Submissions and editing are paused.`;
+    }
+  }
+
+  // Toggle all input fields
+  const inputs = document.querySelectorAll("#cards-container input, #cards-container select, #cards-container textarea, #table-num");
+  inputs.forEach(el => {
+    el.disabled = isLocked;
+    if (isLocked) {
+      el.style.opacity = "0.7";
+      el.style.cursor = "not-allowed";
+    } else {
+      el.style.opacity = "";
+      el.style.cursor = "";
+    }
+  });
+
+  const submitBtn = document.querySelector("#worksheet-view .btn-success");
+  if (submitBtn) {
+    submitBtn.disabled = isLocked;
+    submitBtn.style.opacity = isLocked ? "0.5" : "1";
+    submitBtn.style.cursor = isLocked ? "not-allowed" : "pointer";
+  }
+}
+
+function startParticipantLockPoller() {
+  if (participantLockPollInterval) clearInterval(participantLockPollInterval);
+  participantLockPollInterval = setInterval(async () => {
+    try {
+      const res = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1&since=20s");
+      if (res.ok) {
+        const text = await res.text();
+        const lines = text.trim().split("\n");
+        let hadLockChange = false;
+        lines.forEach(line => {
+          if (!line) return;
+          try {
+            const item = JSON.parse(line);
+            if (item.event === "message" && item.message) {
+              const parsed = JSON.parse(item.message);
+              if (parsed.action === "LOCK_STATE" && parsed.locks) {
+                const prev = JSON.stringify(sectorLocks);
+                const next = JSON.stringify(parsed.locks);
+                if (prev !== next) {
+                  sectorLocks = { ...sectorLocks, ...parsed.locks };
+                  localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+                  hadLockChange = true;
+                }
+              }
+            }
+          } catch(e) {}
+        });
+
+        if (hadLockChange) {
+          const partCard = document.getElementById("participant-card");
+          if (partCard && partCard.style.display !== "none") {
+            renderParticipantDepartmentCards();
+          }
+          if (currentSector && document.getElementById("worksheet-view").style.display !== "none") {
+            applyWorksheetLockState(currentSector);
+          }
+        }
+      }
+    } catch(e) {}
+  }, 6000);
+}
+
 // Initialize App
 document.addEventListener("DOMContentLoaded", async () => {
   try {
+    initSectorLocks();
+    startParticipantLockPoller();
     let res;
     try {
       res = await fetch("api/data");
@@ -170,6 +345,10 @@ function handleLoginSubmit(e) {
     sessionStorage.removeItem("cppr_participant_name");
     openAdmin();
   } else if (norm && appData.sectors[norm]) {
+    if (isSectorLocked(norm)) {
+      showToast(`🔒 ${appData.sectors[norm].display_title} is currently locked by the Facilitator.`, true);
+      return;
+    }
     currentParticipant = null;
     sessionStorage.removeItem("cppr_participant_name");
     openSector(norm);
@@ -188,6 +367,9 @@ function handleLoginSubmit(e) {
 function quickSelectSector(secCode) {
   if (secCode === "admin") {
     openAdmin();
+  } else if (isSectorLocked(secCode)) {
+    const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
+    showToast(`🔒 ${secName} is currently locked by the Facilitator.`, true);
   } else if (currentParticipant) {
     // Route through participant sector selection so progress is tracked
     selectParticipantSector(secCode);
@@ -249,12 +431,17 @@ function renderParticipantDepartmentCards() {
   secMeta.forEach(item => {
     const secInfo = appData.sectors[item.key];
     const prog = getParticipantProgress(currentParticipant, item.key);
+    const locked = isSectorLocked(item.key);
 
     let statusBadgeHtml = `<span class="dept-card-status-badge not-started">Not Started</span>`;
     let actionBtnText = `Start Worksheet ➔`;
     let cardClass = "participant-dept-card";
 
-    if (prog.completedCount === 14) {
+    if (locked) {
+      statusBadgeHtml = `<span class="dept-card-status-badge locked">🔒 Locked by Facilitator</span>`;
+      actionBtnText = `Locked 🔒`;
+      cardClass += " is-locked";
+    } else if (prog.completedCount === 14) {
       statusBadgeHtml = `<span class="dept-card-status-badge completed">✓ Complete (100%)</span>`;
       actionBtnText = `Review Worksheet ➔`;
       cardClass += " complete-progress";
@@ -266,7 +453,13 @@ function renderParticipantDepartmentCards() {
 
     const card = document.createElement("div");
     card.className = cardClass;
-    card.onclick = () => selectParticipantSector(item.key);
+    card.onclick = () => {
+      if (isSectorLocked(item.key)) {
+        showToast(`🔒 ${secInfo.display_title} is currently locked by the Facilitator.`, true);
+        return;
+      }
+      selectParticipantSector(item.key);
+    };
 
     card.innerHTML = `
       <div>
@@ -292,6 +485,10 @@ function renderParticipantDepartmentCards() {
 
 function selectParticipantSector(secKey) {
   if (!appData || !appData.sectors[secKey]) return;
+  if (isSectorLocked(secKey)) {
+    showToast(`🔒 ${appData.sectors[secKey].display_title} is currently locked by the Facilitator.`, true);
+    return;
+  }
   currentSector = secKey;
   sessionStorage.setItem("cppr_active_sector", secKey);
   recordParticipant(currentParticipant, secKey);
@@ -460,6 +657,7 @@ async function openSector(secKey) {
   renderWorkflow(secInfo.workflow);
   renderRubric(secInfo.rubric);
 
+  applyWorksheetLockState(secKey);
   updateProgress();
   switchTab("cards");
 }
@@ -870,6 +1068,12 @@ function triggerAutoSave() {
 
 async function submitResponses(isExplicitSubmit) {
   if (!currentSector) return;
+  if (isSectorLocked(currentSector)) {
+    if (isExplicitSubmit) {
+      showToast(`🔒 Submissions are paused. This department is currently locked by the Facilitator.`, true);
+    }
+    return;
+  }
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1319,14 +1523,17 @@ async function refreshAdminData() {
       const text = await cloudRes.text();
       const lines = text.trim().split("\n");
 
-      // Pass 1: Discover any RESET events in the stream
+      // Pass 1: Discover any RESET or LOCK events in the stream
       lines.forEach(line => {
         try {
           if (!line) return;
           const item = JSON.parse(line);
           if (item.event === "message" && item.message) {
             const parsed = JSON.parse(item.message);
-            if (parsed.action === "RESET_ALL" && parsed.reset_time) {
+            if (parsed.action === "LOCK_STATE" && parsed.locks) {
+              sectorLocks = { ...sectorLocks, ...parsed.locks };
+              localStorage.setItem("cppr_sector_locks", JSON.stringify(sectorLocks));
+            } else if (parsed.action === "RESET_ALL" && parsed.reset_time) {
               if (parsed.reset_time > latestGlobalReset) {
                 latestGlobalReset = parsed.reset_time;
                 localStorage.setItem("cppr_admin_reset_time", latestGlobalReset.toString());
@@ -1349,6 +1556,7 @@ async function refreshAdminData() {
           const item = JSON.parse(line);
           if (item.event === "message" && item.message) {
             const parsed = JSON.parse(item.message);
+            if (parsed.action === "LOCK_STATE") return;
             const msgTimeMs = (item.time || 0) * 1000;
 
             if (latestGlobalReset && msgTimeMs <= latestGlobalReset) return;
@@ -1600,11 +1808,17 @@ function renderAdminTeams(submissions) {
       }).join("");
     }
 
+    const isLocked = isSectorLocked(key);
+    const lockPillHtml = `<span class="sector-lock-pill ${isLocked ? 'locked' : 'unlocked'}">${isLocked ? '🔒 Locked' : '🔓 Active'}</span>`;
+
     const card = document.createElement("div");
     card.className = "admin-card";
     card.innerHTML = `
       <div class="admin-card-header">
-        <div class="admin-card-title">${escapeHtml(secInfo.display_title)}</div>
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+          <div class="admin-card-title">${escapeHtml(secInfo.display_title)}</div>
+          ${lockPillHtml}
+        </div>
         ${statusBadge}
       </div>
       <div class="admin-meta-row">
@@ -1627,6 +1841,7 @@ function renderAdminTeams(submissions) {
         </div>
       </div>
       <div class="admin-card-actions">
+        <button type="button" class="btn-sm" style="${isLocked ? 'background:#fee2e2; color:#991b1b; font-weight:800; border:1.5px solid #fca5a5;' : 'background:#dcfce7; color:#166534; font-weight:800; border:1.5px solid #86efac;'}" onclick="toggleSectorLock('${key}')" title="${isLocked ? 'Click to Unlock this department' : 'Click to Lock this department'}">${isLocked ? '🔓 Unlock' : '🔒 Lock'}</button>
         <button type="button" class="btn-sm" style="flex:1.2; font-weight:700; background:#e0f2fe; color:#0369a1;" onclick="inspectGroup('${key}')" title="Inspect team evaluation">👁️ Inspect Team</button>
         <button type="button" class="btn-sm" style="flex:0.8;" onclick="viewTeamWorksheet('${key}')" title="Open full team worksheet">Worksheet</button>
         <button type="button" class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'xlsx')">📥 Excel</button>
@@ -1636,6 +1851,7 @@ function renderAdminTeams(submissions) {
     `;
     grid.appendChild(card);
   });
+  updateAdminLockSummaryText();
 }
 
 // INSPECTOR MODAL & VIEWS

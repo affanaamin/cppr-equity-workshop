@@ -223,7 +223,26 @@ def run_tests():
     assert r_tariq_fin_get.status_code == 200
     assert r_tariq_fin_get.json()["participant_name"] == "Dr. Tariq"
     assert r_tariq_fin_get.json()["completed_count"] == 1
-    print("[PASS] Participant's progress preserved across multiple departments independently.")
+    # 13. Testing Department Live Lock and Unlock
+    print("\n13. Testing Department Live Lock and Unlock...")
+    r_locks = client.get("/api/locks")
+    assert r_locks.status_code == 200
+    initial_locks = r_locks.json()
+    assert "health" in initial_locks
+
+    # Lock all 4
+    lock_payload = {"health": True, "local": True, "education": True, "finance": True}
+    r_lock_update = client.post("/api/locks", json=lock_payload)
+    assert r_lock_update.status_code == 200
+    assert r_lock_update.json()["locks"]["health"] is True
+
+    # Unlock health only
+    unlock_health_payload = {"health": False, "local": True, "education": True, "finance": True}
+    r_unlock_h = client.post("/api/locks", json=unlock_health_payload)
+    assert r_unlock_h.status_code == 200
+    assert r_unlock_h.json()["locks"]["health"] is False
+    assert r_unlock_h.json()["locks"]["local"] is True
+    print("[PASS] Department Live Lock & Unlock API verified.")
 
     print("\n====================================================")
     print("ALL TESTS PASSED WITH 100% SUCCESS!")
@@ -231,4 +250,5 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
 

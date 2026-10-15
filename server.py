@@ -227,6 +227,25 @@ async def export_sector(sector: str, fmt: str):
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use xlsx, docx, or json.")
 
+LOCKS_FILE = os.path.join(SUBMISSIONS_DIR, "locks.json")
+
+@app.get("/api/locks")
+async def get_locks():
+    if os.path.exists(LOCKS_FILE):
+        try:
+            with open(LOCKS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"health": True, "local": True, "education": True, "finance": True}
+
+@app.post("/api/locks")
+async def update_locks(request: Request):
+    data = await request.json()
+    with open(LOCKS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    return {"status": "success", "locks": data}
+
 # Excel Generator Helper
 def generate_completed_excel(sec: str, payload: Dict[str, Any]):
     sec_info = WORKSHOP_DATA["sectors"][sec]
