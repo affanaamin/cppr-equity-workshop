@@ -545,6 +545,28 @@ async function submitResponses(isExplicitSubmit) {
   }
 }
 
+function resetCurrentWorksheet() {
+  if (!currentSector) return;
+  const secName = (appData.sectors[currentSector] && appData.sectors[currentSector].short_name) || currentSector.toUpperCase();
+  if (!confirm(`Are you sure you want to clear this entire worksheet for ${secName} and start fresh?\n\nAll entered answers for this sector will be reset to blank.`)) {
+    return;
+  }
+
+  currentResponses = {
+    table_number: "",
+    answers: {}
+  };
+  localStorage.removeItem(`cppr_responses_${currentSector}`);
+  const tableInput = document.getElementById("table-num");
+  if (tableInput) tableInput.value = "";
+
+  renderIndicatorCards(appData.sectors[currentSector].cards);
+  updateProgressBar();
+  submitResponses(false);
+
+  showToast(`Worksheet for ${secName} cleared. Ready to start again!`, false);
+}
+
 function setSyncStatus(text, color) {
   const syncBadge = document.getElementById("sync-status");
   const syncText = document.getElementById("sync-text");
@@ -841,12 +863,22 @@ let adminSubmissionsCache = {
 };
 
 async function refreshAdminData() {
+  let latestGlobalReset = parseInt(localStorage.getItem("cppr_admin_reset_time") || "0", 10);
+  let sectorResets = JSON.parse(localStorage.getItem("cppr_sector_resets") || "{}");
+
+  const newCache = {
+    health: { sector: "health", completed_count: 0, answers: {} },
+    local: { sector: "local", completed_count: 0, answers: {} },
+    education: { sector: "education", completed_count: 0, answers: {} },
+    finance: { sector: "finance", completed_count: 0, answers: {} }
+  };
+
   // 1. Try local or serverless API
   try {
     const res = await fetch("api/submissions");
     if (res.ok) {
       const submissions = await res.json();
-      Object.assign(adminSubmissionsCache, submissions);
+      Object.assign(newCache, submissions);
     }
   } catch (err) {}
 
@@ -856,19 +888,49 @@ async function refreshAdminData() {
     if (cloudRes.ok) {
       const text = await cloudRes.text();
       const lines = text.trim().split("\n");
+
+      // Pass 1: Discover any RESET events in the stream
       lines.forEach(line => {
         try {
           if (!line) return;
           const item = JSON.parse(line);
           if (item.event === "message" && item.message) {
             const parsed = JSON.parse(item.message);
-            if (parsed.sector) {
-              adminSubmissionsCache[parsed.sector] = {
+            if (parsed.action === "RESET_ALL" && parsed.reset_time) {
+              if (parsed.reset_time > latestGlobalReset) {
+                latestGlobalReset = parsed.reset_time;
+                localStorage.setItem("cppr_admin_reset_time", latestGlobalReset.toString());
+              }
+            } else if (parsed.action === "RESET_SECTOR" && parsed.sector && parsed.reset_time) {
+              const prev = sectorResets[parsed.sector] || 0;
+              if (parsed.reset_time > prev) {
+                sectorResets[parsed.sector] = parsed.reset_time;
+                localStorage.setItem("cppr_sector_resets", JSON.stringify(sectorResets));
+              }
+            }
+          }
+        } catch(e) {}
+      });
+
+      // Pass 2: Merge submissions created AFTER the latest reset
+      lines.forEach(line => {
+        try {
+          if (!line) return;
+          const item = JSON.parse(line);
+          if (item.event === "message" && item.message) {
+            const parsed = JSON.parse(item.message);
+            const msgTimeMs = (item.time || 0) * 1000;
+
+            if (latestGlobalReset && msgTimeMs <= latestGlobalReset) return;
+            if (parsed.sector && sectorResets[parsed.sector] && msgTimeMs <= sectorResets[parsed.sector]) return;
+
+            if (parsed.sector && parsed.answers !== undefined) {
+              newCache[parsed.sector] = {
                 sector: parsed.sector,
                 table_number: parsed.table_number,
-                completed_count: parsed.completed_count,
+                completed_count: parsed.completed_count || 0,
                 total_count: 14,
-                completion_pct: Math.round((parsed.completed_count / 14) * 100),
+                completion_pct: Math.round(((parsed.completed_count || 0) / 14) * 100),
                 last_saved: parsed.last_saved,
                 answers: parsed.answers || {}
               };
@@ -879,9 +941,88 @@ async function refreshAdminData() {
     }
   } catch (err) {}
 
+  adminSubmissionsCache = newCache;
   renderAdminTeams(adminSubmissionsCache);
   populateAdminIndicatorSelect();
   renderAdminComparison();
+}
+
+async function resetAllSubmissions() {
+  const confirmMsg = "Are you sure you want to reset ALL workshop submissions?\n\nThis will clear the dashboard progress bars across all 4 teams so participants can submit fresh.";
+  if (!confirm(confirmMsg)) return;
+
+  const nowMs = Date.now();
+  localStorage.setItem("cppr_admin_reset_time", nowMs.toString());
+
+  // Post reset event to ntfy cloud topic
+  try {
+    fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
+      method: "POST",
+      headers: {
+        "Title": "RESET: ALL TEAMS",
+        "Priority": "high",
+        "Tags": "wastebasket,warning",
+        "X-Action": "RESET_ALL"
+      },
+      body: JSON.stringify({
+        action: "RESET_ALL",
+        reset_time: nowMs,
+        time_str: new Date().toLocaleTimeString()
+      })
+    }).catch(e => console.log(e));
+  } catch(e) {}
+
+  // Post to local server if available
+  try {
+    await fetch("api/reset", { method: "POST" });
+  } catch(e) {}
+
+  adminSubmissionsCache = {
+    health: { sector: "health", completed_count: 0, answers: {} },
+    local: { sector: "local", completed_count: 0, answers: {} },
+    education: { sector: "education", completed_count: 0, answers: {} },
+    finance: { sector: "finance", completed_count: 0, answers: {} }
+  };
+
+  renderAdminTeams(adminSubmissionsCache);
+  renderAdminComparison();
+  showToast("All dashboard submissions reset to 0%.", false);
+}
+
+async function resetSingleSector(sector) {
+  const secName = (appData.sectors[sector] && appData.sectors[sector].short_name) || sector.toUpperCase();
+  if (!confirm(`Are you sure you want to reset submissions for ${secName}?`)) return;
+
+  const nowMs = Date.now();
+  let sectorResets = JSON.parse(localStorage.getItem("cppr_sector_resets") || "{}");
+  sectorResets[sector] = nowMs;
+  localStorage.setItem("cppr_sector_resets", JSON.stringify(sectorResets));
+
+  try {
+    fetch("https://ntfy.sh/cppr_workshop_affan_submissions", {
+      method: "POST",
+      headers: {
+        "Title": `RESET: ${sector.toUpperCase()}`,
+        "Priority": "high",
+        "Tags": "wastebasket",
+        "X-Action": "RESET_SECTOR"
+      },
+      body: JSON.stringify({
+        action: "RESET_SECTOR",
+        sector: sector,
+        reset_time: nowMs
+      })
+    }).catch(e => {});
+  } catch(e) {}
+
+  try {
+    await fetch(`api/reset/${sector}`, { method: "POST" });
+  } catch(e) {}
+
+  adminSubmissionsCache[sector] = { sector: sector, completed_count: 0, answers: {} };
+  renderAdminTeams(adminSubmissionsCache);
+  renderAdminComparison();
+  showToast(`${secName} submissions reset to 0%.`, false);
 }
 
 function renderAdminTeams(submissions) {
@@ -923,9 +1064,10 @@ function renderAdminTeams(submissions) {
         <div class="progress-fill" style="width: ${pct}%;"></div>
       </div>
       <div class="admin-card-actions">
-        <button class="btn-sm" style="flex:1;" onclick="openSector('${key}')">👁️ View Team</button>
+        <button class="btn-sm" style="flex:1;" onclick="openSector('${key}')">👁️ View</button>
         <button class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'xlsx')">📥 Excel</button>
         <button class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'docx')">📄 Word</button>
+        <button class="btn-sm" style="background:#fee2e2; color:#991b1b;" onclick="resetSingleSector('${key}')" title="Reset this team to 0%">🔄 Reset</button>
       </div>
     `;
     grid.appendChild(card);

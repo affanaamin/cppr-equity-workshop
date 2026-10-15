@@ -138,6 +138,30 @@ async def save_sector_submission(sector: str, payload: Dict[str, Any]):
         "completion_pct": payload["completion_pct"]
     }
 
+@app.post("/api/reset")
+async def reset_all_submissions():
+    for sec in ["health", "local", "education", "finance"]:
+        for prefix in [f"{sec}_submission.json", f"{sec}_Completed_Workbook.xlsx", f"{sec}_Completed_Worksheet.docx"]:
+            fpath = os.path.join(SUBMISSIONS_DIR, prefix)
+            if os.path.exists(fpath):
+                try:
+                    os.remove(fpath)
+                except Exception:
+                    pass
+    return {"status": "success", "message": "All submissions reset"}
+
+@app.post("/api/reset/{sector}")
+async def reset_sector_submission(sector: str):
+    sec = sector.lower().strip()
+    for prefix in [f"{sec}_submission.json", f"{sec}_Completed_Workbook.xlsx", f"{sec}_Completed_Worksheet.docx"]:
+        fpath = os.path.join(SUBMISSIONS_DIR, prefix)
+        if os.path.exists(fpath):
+            try:
+                os.remove(fpath)
+            except Exception:
+                pass
+    return {"status": "success", "message": f"Sector {sec} reset"}
+
 @app.get("/api/export/{sector}/{fmt}")
 async def export_sector(sector: str, fmt: str):
     sec = sector.lower().strip()
