@@ -326,14 +326,20 @@ function checkUrlOrStorageLogin() {
       openAdmin();
       return;
     } else if (norm && appData.sectors[norm]) {
-      openSector(norm);
-      return;
+      if (currentParticipant) {
+        openSector(norm);
+        return;
+      } else {
+        // Direct departmental access without individual participant name is locked!
+        showLoginView();
+        return;
+      }
     }
   }
 
   // Check saved session
   const savedSector = sessionStorage.getItem("cppr_active_sector");
-  if (savedSector && appData.sectors[savedSector]) {
+  if (savedSector && appData.sectors[savedSector] && currentParticipant) {
     openSector(savedSector);
   } else if (currentParticipant) {
     showParticipantPicker(currentParticipant);
@@ -360,8 +366,9 @@ function handleLoginSubmit(e) {
   const val = (inputEl.value || "").trim();
 
   if (!val) {
-    showToast("Please enter your name or a sector code.", true);
+    showToast("Please enter your name in the input bar above.", true);
     inputEl.style.borderColor = "#ef4444";
+    inputEl.focus();
     setTimeout(() => { inputEl.style.borderColor = ""; }, 1500);
     return;
   }
@@ -372,23 +379,33 @@ function handleLoginSubmit(e) {
     currentParticipant = null;
     sessionStorage.removeItem("cppr_participant_name");
     openAdmin();
-  } else if (norm && appData.sectors[norm]) {
-    // Participant typed sector code: guide them to enter their name so they can edit their own
-    const promptName = prompt(`You selected ${appData.sectors[norm].display_title}.\nEnter your Name to evaluate on your own:\n(Note: Departmental master view is read-only)`);
-    if (promptName && promptName.trim().length >= 2) {
-      showParticipantPicker(promptName.trim());
-      selectParticipantSector(norm);
-      return;
-    }
-    currentParticipant = null;
-    sessionStorage.removeItem("cppr_participant_name");
-    openSector(norm);
-  } else if (val.length >= 2) {
-    // Participant Name entered!
+    return;
+  }
+
+  if (norm && appData.sectors[norm]) {
+    // Participant typed a department name directly into the bar instead of their name!
+    const secName = appData.sectors[norm].display_title;
+    showToast(`🔒 Direct access to ${secName} is locked! Please enter your individual name (e.g. Dr. Tariq) in the bar above.`, true);
+    inputEl.value = "";
+    inputEl.placeholder = "Enter your individual name (not department)...";
+    inputEl.style.borderColor = "#ef4444";
+    inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
+    inputEl.focus();
+    setTimeout(() => {
+      inputEl.style.borderColor = "";
+      inputEl.style.boxShadow = "";
+      inputEl.placeholder = "Enter your Name (e.g. Dr. Tariq, sheraz)...";
+    }, 2500);
+    return;
+  }
+
+  if (val.length >= 2) {
+    // Individual participant name typed into the existing bar!
     showParticipantPicker(val);
   } else {
-    showToast("Please enter your name or an assigned sector code.", true);
+    showToast("Please enter a valid name (at least 2 characters).", true);
     inputEl.style.borderColor = "#ef4444";
+    inputEl.focus();
     setTimeout(() => {
       inputEl.style.borderColor = "";
     }, 1500);
@@ -398,25 +415,38 @@ function handleLoginSubmit(e) {
 function quickSelectSector(secCode) {
   if (secCode === "admin") {
     openAdmin();
-  } else if (currentParticipant) {
-    // Route through participant sector selection so progress is tracked
+    return;
+  }
+
+  // If a participant is already logged in
+  if (currentParticipant) {
     selectParticipantSector(secCode);
-  } else {
-    // Check if input has a name typed
-    const inputVal = (document.getElementById("sector-input")?.value || "").trim();
-    if (inputVal.length >= 2 && !normalizeSectorCode(inputVal)) {
-      showParticipantPicker(inputVal);
-      selectParticipantSector(secCode);
-      return;
-    }
-    const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
-    const promptName = prompt(`You selected ${secName}.\nEnter your Name to start your own evaluation:\n(Note: Departmental master view is read-only)`);
-    if (promptName && promptName.trim().length >= 2) {
-      showParticipantPicker(promptName.trim());
-      selectParticipantSector(secCode);
-    } else {
-      openSector(secCode);
-    }
+    return;
+  }
+
+  // Check if participant has already typed their name in the input bar
+  const inputEl = document.getElementById("sector-input");
+  const inputVal = (inputEl?.value || "").trim();
+  const norm = normalizeSectorCode(inputVal);
+
+  if (inputVal.length >= 2 && !norm) {
+    // User typed their name in the bar and clicked a quick department pill
+    showParticipantPicker(inputVal);
+    selectParticipantSector(secCode);
+    return;
+  }
+
+  // Otherwise: SAY NO! Direct departmental access is locked!
+  const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
+  showToast(`🔒 ${secName} is locked! You cannot open departments directly. Please enter your name in the input bar above.`, true);
+  if (inputEl) {
+    inputEl.style.borderColor = "#ef4444";
+    inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
+    inputEl.focus();
+    setTimeout(() => {
+      inputEl.style.borderColor = "";
+      inputEl.style.boxShadow = "";
+    }, 1800);
   }
 }
 
@@ -610,6 +640,12 @@ function logoutSector() {
 
 // Open Specific Sector Worksheet
 async function openSector(secKey) {
+  if (!currentParticipant && !isFacilitatorInspectMode) {
+    showToast("🔒 Direct departmental access is locked. Please enter your name in the input bar to begin.", true);
+    showLoginView();
+    return;
+  }
+
   currentSector = secKey;
   sessionStorage.setItem("cppr_active_sector", secKey);
 

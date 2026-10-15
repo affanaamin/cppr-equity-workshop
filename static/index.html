@@ -25,22 +25,22 @@
             type="text" 
             id="sector-input" 
             class="login-input" 
-            placeholder='Enter your Name (e.g. Dr. Tariq) or Sector...'
+            placeholder='Enter your Name (e.g. Dr. Tariq, sheraz)...'
             autocomplete="off" 
             autofocus
             spellcheck="false"
           >
-          <button type="submit" class="login-btn" title="Open Worksheet or Select Department">➔</button>
+          <button type="submit" class="login-btn" title="Start Individual Evaluation">➔</button>
         </div>
       </form>
       
-      <p class="login-hint">Enter your name to track your individual evaluation progress, or select a department directly.</p>
+      <p class="login-hint">Type your individual name in the bar above to begin your evaluation and save progress.</p>
 
       <div class="login-pills">
-        <button type="button" class="quick-pill" onclick="quickSelectSector('health')">🏥 Health</button>
-        <button type="button" class="quick-pill" onclick="quickSelectSector('local')">🏛️ Local Government</button>
-        <button type="button" class="quick-pill" onclick="quickSelectSector('education')">🎓 Education</button>
-        <button type="button" class="quick-pill" onclick="quickSelectSector('finance')">💼 Finance & Planning</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('health')" title="Direct access locked - Enter your name above">🔒 🏥 Health</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('local')" title="Direct access locked - Enter your name above">🔒 🏛️ Local Gov</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('education')" title="Direct access locked - Enter your name above">🔒 🎓 Education</button>
+        <button type="button" class="quick-pill" onclick="quickSelectSector('finance')" title="Direct access locked - Enter your name above">🔒 💼 Finance & Planning</button>
       </div>
 
       <!-- Saved / Recent Participants on this browser -->
