@@ -12,6 +12,8 @@ let currentResponses = {
 };
 let saveTimeout = null;
 let adminPollInterval = null;
+let isFacilitatorInspectMode = false;
+let currentInspectorTarget = null;
 let customDriveFolder = localStorage.getItem("cppr_drive_folder") || "";
 
 // Initialize App
@@ -351,6 +353,10 @@ function logoutSector() {
     clearInterval(adminPollInterval);
     adminPollInterval = null;
   }
+  if (isFacilitatorInspectMode) {
+    returnToAdminDesk();
+    return;
+  }
   sessionStorage.removeItem("cppr_active_sector");
 
   if (currentParticipant) {
@@ -379,13 +385,38 @@ async function openSector(secKey) {
   document.getElementById("admin-view").style.display = "none";
   document.getElementById("worksheet-view").style.display = "flex";
 
+  // Check Inspector Banner
+  const inspBanner = document.getElementById("inspector-top-banner");
+  if (inspBanner) {
+    if (isFacilitatorInspectMode) {
+      inspBanner.style.display = "flex";
+      const targetLabel = currentParticipant ? `Participant: ${currentParticipant}` : `Team Focus: ${secInfo.display_title}`;
+      const bannerText = document.getElementById("inspector-banner-text");
+      if (bannerText) bannerText.textContent = `FACILITATOR INSPECTOR: Viewing ${targetLabel} — Live Preview`;
+    } else {
+      inspBanner.style.display = "none";
+    }
+  }
+
   // Update Header Banner
   const topNameEl = document.getElementById("top-sector-name");
   const bannerTeamEl = document.getElementById("banner-team-name");
   const partTagEl = document.getElementById("header-participant-tag");
   const switchBtn = document.getElementById("btn-switch-sector");
 
-  if (currentParticipant) {
+  if (isFacilitatorInspectMode) {
+    topNameEl.textContent = `${secInfo.display_title} (Inspecting: ${currentParticipant || 'Team'})`;
+    bannerTeamEl.textContent = `${currentParticipant || 'Team'} — ${secInfo.display_title}`;
+    if (partTagEl) {
+      partTagEl.textContent = currentParticipant ? `🔍 Inspecting: ${currentParticipant}` : `🔍 Inspecting: Team`;
+      partTagEl.style.display = "inline-flex";
+    }
+    if (switchBtn) {
+      switchBtn.textContent = `← Exit to Facilitator Desk`;
+      switchBtn.style.background = "#eff6ff";
+      switchBtn.style.color = "#1d4ed8";
+    }
+  } else if (currentParticipant) {
     topNameEl.textContent = `${secInfo.display_title} — ${currentParticipant}`;
     bannerTeamEl.textContent = `${currentParticipant} — ${secInfo.display_title}`;
     if (partTagEl) {
@@ -394,6 +425,8 @@ async function openSector(secKey) {
     }
     if (switchBtn) {
       switchBtn.textContent = `🚪 Switch Dept`;
+      switchBtn.style.background = "";
+      switchBtn.style.color = "";
     }
   } else {
     topNameEl.textContent = secInfo.display_title;
@@ -403,12 +436,14 @@ async function openSector(secKey) {
     }
     if (switchBtn) {
       switchBtn.textContent = `🚪 Switch Sector`;
+      switchBtn.style.background = "";
+      switchBtn.style.color = "";
     }
   }
 
   document.getElementById("banner-scope").textContent = secInfo.scope;
 
-  // Load responses from LocalStorage first, then server
+  // Load responses from LocalStorage, then server, with admin cache fallback
   loadLocalResponses(secKey);
   await fetchServerResponses(secKey);
 
@@ -451,6 +486,37 @@ function loadLocalResponses(secKey) {
       table_number: currentParticipant || "", 
       answers: {} 
     };
+  }
+
+  // CRITICAL INSPECTION / CLOUD SYNC:
+  // If local responses have no answers, pull from adminSubmissionsCache (loaded from ntfy.sh or server)
+  const localAnswersCount = Object.keys(currentResponses.answers || {}).length;
+  if (localAnswersCount === 0 && adminSubmissionsCache && adminSubmissionsCache[secKey]) {
+    const subData = adminSubmissionsCache[secKey];
+    if (currentParticipant) {
+      const partsMap = subData.participants || {};
+      let match = partsMap[currentParticipant];
+      if (!match) {
+        const sTarget = sanitizeParticipantKey(currentParticipant);
+        for (const p in partsMap) {
+          if (sanitizeParticipantKey(p) === sTarget) {
+            match = partsMap[p];
+            break;
+          }
+        }
+      }
+      if (match && match.answers && Object.keys(match.answers).length > 0) {
+        currentResponses.answers = { ...match.answers };
+        currentResponses.table_number = match.table_number || currentResponses.table_number || currentParticipant;
+        currentResponses.last_saved = match.last_saved || "";
+      }
+    } else {
+      if (subData.answers && Object.keys(subData.answers).length > 0) {
+        currentResponses.answers = { ...subData.answers };
+        currentResponses.table_number = subData.table_number || "";
+        currentResponses.last_saved = subData.last_saved || "";
+      }
+    }
   }
 }
 
@@ -783,6 +849,11 @@ function updateProgress() {
 
 // AutoSave Mechanism
 function triggerAutoSave() {
+  if (isFacilitatorInspectMode) {
+    // Read-only inspection mode: do not save or overwrite participant submissions
+    setSyncStatus("Inspection Mode (Read-Only)", "#0284c7");
+    return;
+  }
   setSyncStatus("Saving...", "#f59e0b");
   if (currentParticipant) {
     currentResponses.participant_name = currentParticipant;
@@ -1473,10 +1544,23 @@ function renderAdminTeams(submissions) {
   secKeys.forEach(key => {
     const secInfo = appData.sectors[key];
     const sub = submissions[key] || {};
-    const count = sub.completed_count || 0;
+    let count = sub.completed_count || 0;
     const total = 14;
-    const pct = sub.completion_pct || Math.round((count / total) * 100);
     const lastSaved = sub.last_saved || "Not started";
+
+    const participantsMap = sub.participants || {};
+    const participantsList = Object.values(participantsMap);
+
+    // If team count is 0, check if any individual participant in this sector has progress!
+    if (count === 0 && participantsList.length > 0) {
+      let maxPartCount = 0;
+      participantsList.forEach(p => {
+        const c = p.completed_count || 0;
+        if (c > maxPartCount) maxPartCount = c;
+      });
+      if (maxPartCount > 0) count = maxPartCount;
+    }
+    const pct = sub.completion_pct || Math.round((count / total) * 100);
 
     let statusBadge = `<span class="admin-status-badge" style="background:#f1f5f9; color:#64748b;">Not Started</span>`;
     if (count > 0 && count < total) {
@@ -1484,9 +1568,6 @@ function renderAdminTeams(submissions) {
     } else if (count >= total) {
       statusBadge = `<span class="admin-status-badge" style="background:#ecfdf5; color:#065f46;">✓ Complete (100%)</span>`;
     }
-
-    const participantsMap = sub.participants || {};
-    const participantsList = Object.values(participantsMap);
 
     let participantsListHtml = "";
     if (participantsList.length === 0) {
@@ -1499,6 +1580,8 @@ function renderAdminTeams(submissions) {
         if (pPct === 100) badgeStyle = "background:#dcfce7; color:#166534;";
         else if (pCount > 0) badgeStyle = "background:#fef3c7; color:#92400e;";
 
+        const encPart = encodeURIComponent(p.participant_name);
+
         return `
           <div class="admin-participant-row">
             <div>
@@ -1509,7 +1592,8 @@ function renderAdminTeams(submissions) {
               <span class="admin-participant-prog" style="${badgeStyle}">
                 ${pCount}/14 (${pPct}%)
               </span>
-              <button class="btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.72rem; font-weight:700;" onclick="viewParticipantWorksheet('${key}', '${escapeHtml(p.participant_name)}')">👁️ Inspect</button>
+              <button type="button" class="btn-sm" style="padding: 0.2rem 0.55rem; font-size: 0.72rem; font-weight:700; background:#e0f2fe; color:#0369a1;" onclick="openInspectorModal('${key}', '${encPart}')" title="Inspect ${escapeHtml(p.participant_name)}'s completed answers">👁️ Inspect</button>
+              <button type="button" class="btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.72rem;" onclick="openParticipantWorksheetDirect('${key}', '${encPart}')" title="Open full worksheet">Worksheet ➔</button>
             </div>
           </div>
         `;
@@ -1543,20 +1627,316 @@ function renderAdminTeams(submissions) {
         </div>
       </div>
       <div class="admin-card-actions">
-        <button class="btn-sm" style="flex:1;" onclick="openSector('${key}')">👁️ View</button>
-        <button class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'xlsx')">📥 Excel</button>
-        <button class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'docx')">📄 Word</button>
-        <button class="btn-sm" style="background:#fee2e2; color:#991b1b;" onclick="resetSingleSector('${key}')" title="Reset this team to 0%">🔄 Reset</button>
+        <button type="button" class="btn-sm" style="flex:1.2; font-weight:700; background:#e0f2fe; color:#0369a1;" onclick="inspectGroup('${key}')" title="Inspect team evaluation">👁️ Inspect Team</button>
+        <button type="button" class="btn-sm" style="flex:0.8;" onclick="viewTeamWorksheet('${key}')" title="Open full team worksheet">Worksheet</button>
+        <button type="button" class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'xlsx')">📥 Excel</button>
+        <button type="button" class="btn-sm" style="flex:1;" onclick="exportResponsesForSector('${key}', 'docx')">📄 Word</button>
+        <button type="button" class="btn-sm" style="background:#fee2e2; color:#991b1b;" onclick="resetSingleSector('${key}')" title="Reset this team to 0%">🔄 Reset</button>
       </div>
     `;
     grid.appendChild(card);
   });
 }
 
-function viewParticipantWorksheet(secKey, participantName) {
-  currentParticipant = participantName;
-  sessionStorage.setItem("cppr_participant_name", participantName);
+// INSPECTOR MODAL & VIEWS
+function openInspectorModal(secKey, encodedPartName) {
+  const participantName = encodedPartName ? decodeURIComponent(encodedPartName) : null;
+  const secInfo = (appData && appData.sectors[secKey]) || { display_title: secKey.toUpperCase(), short_name: secKey.toUpperCase(), cards: [] };
+  const subData = (adminSubmissionsCache && adminSubmissionsCache[secKey]) || {};
+
+  let targetAnswers = {};
+  let tableNumber = "";
+  let lastSaved = "";
+  let title = "";
+  let subtitle = "";
+
+  if (participantName) {
+    title = `Participant: ${participantName}`;
+    const pData = (subData.participants && (subData.participants[participantName] || subData.participants[participantName.trim()])) || {};
+    targetAnswers = pData.answers || {};
+    tableNumber = pData.table_number || `Table - ${participantName}`;
+    lastSaved = pData.last_saved || "Saved on Device";
+
+    // Fallback: search localStorage
+    if (Object.keys(targetAnswers).length === 0) {
+      const prog = getParticipantProgress(participantName, secKey);
+      if (prog && prog.answers && Object.keys(prog.answers).length > 0) {
+        targetAnswers = prog.answers;
+        tableNumber = prog.table_number || tableNumber;
+      }
+    }
+    subtitle = `Department: ${secInfo.display_title} | Table: ${tableNumber} | Last active: ${lastSaved}`;
+  } else {
+    // Group / Team inspection
+    title = `Team Focus: ${secInfo.display_title}`;
+    targetAnswers = subData.answers || {};
+    tableNumber = subData.table_number || `Team - ${secInfo.short_name}`;
+    lastSaved = subData.last_saved || "Not started";
+
+    // Fallback: search localStorage
+    if (Object.keys(targetAnswers).length === 0) {
+      try {
+        const localTeam = JSON.parse(localStorage.getItem(`cppr_responses_${secKey}`) || "{}");
+        if (localTeam.answers && Object.keys(localTeam.answers).length > 0) {
+          targetAnswers = localTeam.answers;
+          tableNumber = localTeam.table_number || tableNumber;
+          lastSaved = localTeam.last_saved || lastSaved;
+        }
+      } catch(e) {}
+    }
+
+    const pList = Object.values(subData.participants || {});
+    if (Object.keys(targetAnswers).length === 0 && pList.length > 0) {
+      subtitle = `Department: ${secInfo.display_title} | Individual Submissions: ${pList.map(p => p.participant_name).join(", ")}`;
+    } else {
+      subtitle = `Department: ${secInfo.display_title} | Table: ${tableNumber} | Last active: ${lastSaved}`;
+    }
+  }
+
+  // Calculate completion count
+  let completedCount = 0;
+  for (const cid in targetAnswers) {
+    const a = targetAnswers[cid];
+    if (a && a.status && a.evidence && a.evidence.trim().length > 0) {
+      completedCount++;
+    }
+  }
+  const pct = Math.round((completedCount / 14) * 100);
+
+  currentInspectorTarget = {
+    sector: secKey,
+    participant: participantName,
+    answers: targetAnswers,
+    table_number: tableNumber,
+    last_saved: lastSaved,
+    completed_count: completedCount,
+    pct: pct
+  };
+
+  // Populate Header
+  const deptBadge = document.getElementById("insp-dept-badge");
+  if (deptBadge) deptBadge.textContent = `${secInfo.short_name.toUpperCase()} FOCUS`;
+
+  const progBadge = document.getElementById("insp-prog-badge");
+  if (progBadge) {
+    progBadge.textContent = `${completedCount} / 14 Completed (${pct}%)`;
+    if (pct === 100) {
+      progBadge.style.background = "#dcfce7";
+      progBadge.style.color = "#166534";
+    } else if (completedCount > 0) {
+      progBadge.style.background = "#fef3c7";
+      progBadge.style.color = "#92400e";
+    } else {
+      progBadge.style.background = "#f1f5f9";
+      progBadge.style.color = "#64748b";
+    }
+  }
+
+  const titleEl = document.getElementById("insp-title");
+  if (titleEl) titleEl.textContent = title;
+
+  const subEl = document.getElementById("insp-subtitle");
+  if (subEl) subEl.textContent = subtitle;
+
+  const footerSummary = document.getElementById("insp-footer-summary");
+  if (footerSummary) footerSummary.textContent = `${completedCount} of 14 Completed (${pct}%) — ${secInfo.display_title}`;
+
+  // Reset filter buttons
+  document.querySelectorAll(".insp-filter-btn").forEach(b => b.classList.remove("active"));
+  const allBtn = document.getElementById("insp-flt-all");
+  if (allBtn) allBtn.classList.add("active");
+
+  renderInspectorCards("all");
+
+  const modal = document.getElementById("inspector-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function inspectGroup(secKey) {
+  openInspectorModal(secKey, null);
+}
+
+function renderInspectorCards(filterMode) {
+  if (!currentInspectorTarget || !appData) return;
+  const container = document.getElementById("inspector-cards-list");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const secInfo = appData.sectors[currentInspectorTarget.sector];
+  if (!secInfo) return;
+
+  const cards = secInfo.cards || [];
+  const answers = currentInspectorTarget.answers || {};
+
+  let doneTotal = 0;
+  let todoTotal = 0;
+
+  cards.forEach(card => {
+    const a = answers[card.id];
+    const isDone = Boolean(a && a.status && a.evidence && a.evidence.trim().length > 0);
+    if (isDone) doneTotal++;
+    else todoTotal++;
+  });
+
+  const cntDoneEl = document.getElementById("insp-cnt-done");
+  if (cntDoneEl) cntDoneEl.textContent = doneTotal.toString();
+  const cntTodoEl = document.getElementById("insp-cnt-todo");
+  if (cntTodoEl) cntTodoEl.textContent = todoTotal.toString();
+
+  cards.forEach(card => {
+    const a = answers[card.id];
+    const isDone = Boolean(a && a.status && a.evidence && a.evidence.trim().length > 0);
+
+    if (filterMode === "done" && !isDone) return;
+    if (filterMode === "todo" && isDone) return;
+
+    const cardEl = document.createElement("div");
+    cardEl.className = `insp-card ${isDone ? 'is-done' : 'is-empty'}`;
+
+    let statusBadgeHtml = `<span class="insp-status-badge empty">⚪ Not Assessed</span>`;
+    if (a && a.status === "YES") {
+      statusBadgeHtml = `<span class="insp-status-badge yes">✓ YES — Institutionalized</span>`;
+    } else if (a && a.status === "NO") {
+      statusBadgeHtml = `<span class="insp-status-badge no">✕ NO — No Evidence Found</span>`;
+    } else if (a && a.status === "PARTIAL") {
+      statusBadgeHtml = `<span class="insp-status-badge partial">⚠ PARTIAL — Ad-hoc / Marginal</span>`;
+    }
+
+    const pageCitation = (a && a.page_ref) || (a && a.book_page ? `Doc p. ${a.book_page} / PDF p. ${a.pdf_page || ''}` : "None recorded");
+    const searchedPdf = (a && a.pdf_searched) || "Not selected";
+    const evidenceText = (a && a.evidence && a.evidence.trim()) || "No transcribed evidence entered.";
+    const dimensionsList = (a && a.dimensions && a.dimensions.length > 0) ? a.dimensions : [];
+    const rationaleText = (a && a.rationale && a.rationale.trim()) || "No analytical rationale provided.";
+
+    const dimsHtml = dimensionsList.length > 0
+      ? dimensionsList.map(d => `<span class="insp-dim-pill">🏷️ ${escapeHtml(d)}</span>`).join("")
+      : `<span style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">None marked</span>`;
+
+    cardEl.innerHTML = `
+      <div class="insp-card-header">
+        <div class="insp-card-title">INDICATOR ${card.id}: ${escapeHtml(card.stage.toUpperCase())}</div>
+        ${statusBadgeHtml}
+      </div>
+      <div class="insp-card-question">${escapeHtml(card.question)}</div>
+
+      <div class="insp-detail-grid">
+        <div class="insp-meta-item">
+          <strong>Assigned PDF:</strong> ${escapeHtml(searchedPdf)}
+        </div>
+        <div class="insp-meta-item">
+          <strong>Page Citation:</strong> ${escapeHtml(pageCitation)}
+        </div>
+      </div>
+
+      <div class="insp-evidence-box">
+        <strong>Transcribed Verbatim Evidence & Monetary Amounts:</strong>
+        ${escapeHtml(evidenceText)}
+      </div>
+
+      <div style="margin-bottom: 0.6rem;">
+        <span style="font-size:0.75rem; font-weight:700; color:var(--primary-steel); text-transform:uppercase; display:block; margin-bottom:0.25rem;">Equity Dimensions:</span>
+        <div class="insp-dimensions-box">
+          ${dimsHtml}
+        </div>
+      </div>
+
+      <div class="insp-rationale-box">
+        <strong>Analytical Rationale & Findings:</strong>
+        ${escapeHtml(rationaleText)}
+      </div>
+    `;
+
+    container.appendChild(cardEl);
+  });
+
+  if (container.children.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2.5rem; color: var(--text-muted); font-style: italic;">
+        No indicators match the selected filter.
+      </div>
+    `;
+  }
+}
+
+function filterInspectorCards(mode) {
+  document.querySelectorAll(".insp-filter-btn").forEach(b => b.classList.remove("active"));
+  const btn = document.getElementById(`insp-flt-${mode}`);
+  if (btn) btn.classList.add("active");
+  renderInspectorCards(mode);
+}
+
+function closeInspectorModal() {
+  const modal = document.getElementById("inspector-modal");
+  if (modal) modal.style.display = "none";
+}
+
+function handleModalBackdropClick(e) {
+  if (e.target && e.target.id === "inspector-modal") {
+    closeInspectorModal();
+  }
+}
+
+function exportCurrentInspector(fmt) {
+  if (!currentInspectorTarget) return;
+  const origSector = currentSector;
+  const origResponses = currentResponses;
+  const origParticipant = currentParticipant;
+
+  currentSector = currentInspectorTarget.sector;
+  currentParticipant = currentInspectorTarget.participant;
+  currentResponses = {
+    participant_name: currentInspectorTarget.participant || "",
+    table_number: currentInspectorTarget.table_number || "",
+    answers: currentInspectorTarget.answers || {}
+  };
+
+  exportResponses(fmt);
+
+  currentSector = origSector;
+  currentResponses = origResponses;
+  currentParticipant = origParticipant;
+}
+
+function openInspectorInWorksheet() {
+  if (!currentInspectorTarget) return;
+  closeInspectorModal();
+
+  isFacilitatorInspectMode = true;
+  currentParticipant = currentInspectorTarget.participant;
+  if (currentParticipant) {
+    sessionStorage.setItem("cppr_participant_name", currentParticipant);
+  } else {
+    sessionStorage.removeItem("cppr_participant_name");
+  }
+
+  openSector(currentInspectorTarget.sector);
+}
+
+function viewParticipantWorksheet(secKey, encodedPartName) {
+  openInspectorModal(secKey, encodedPartName);
+}
+
+function openParticipantWorksheetDirect(secKey, encodedPartName) {
+  const pName = decodeURIComponent(encodedPartName);
+  isFacilitatorInspectMode = true;
+  currentParticipant = pName;
+  sessionStorage.setItem("cppr_participant_name", pName);
   openSector(secKey);
+}
+
+function viewTeamWorksheet(secKey) {
+  isFacilitatorInspectMode = true;
+  currentParticipant = null;
+  sessionStorage.removeItem("cppr_participant_name");
+  openSector(secKey);
+}
+
+function returnToAdminDesk() {
+  isFacilitatorInspectMode = false;
+  currentParticipant = null;
+  sessionStorage.removeItem("cppr_participant_name");
+  sessionStorage.removeItem("cppr_active_sector");
+  openAdmin();
 }
 
 function exportResponsesForSector(key, fmt) {
@@ -1588,7 +1968,21 @@ function renderAdminComparison() {
   ["health", "local", "education", "finance"].forEach(key => {
     const secInfo = appData.sectors[key];
     const sub = subs[key] || {};
-    const ans = (sub.answers || {})[selectedCid] || {};
+    let ans = (sub.answers || {})[selectedCid];
+    let sourceLabel = secInfo.short_name;
+
+    // If team has no answer for this card, check if any participant in this sector answered it!
+    if (!ans || (!ans.status && (!ans.evidence || !ans.evidence.trim()))) {
+      const parts = Object.values(sub.participants || {});
+      for (const p of parts) {
+        if (p.answers && p.answers[selectedCid] && (p.answers[selectedCid].status || (p.answers[selectedCid].evidence && p.answers[selectedCid].evidence.trim()))) {
+          ans = p.answers[selectedCid];
+          sourceLabel = `${secInfo.short_name} (${p.participant_name})`;
+          break;
+        }
+      }
+    }
+    ans = ans || {};
 
     let statusColor = "#64748b";
     let statusBg = "#f1f5f9";
@@ -1600,7 +1994,7 @@ function renderAdminComparison() {
     col.style = "background: #f8fafc; border: 1px solid var(--border-light); border-radius: 0.75rem; padding: 1rem;";
     col.innerHTML = `
       <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-navy); margin-bottom: 0.4rem;">
-        ${escapeHtml(secInfo.short_name)}
+        ${escapeHtml(sourceLabel)}
       </div>
       <div style="display:inline-block; font-size:0.75rem; font-weight:700; padding:0.2rem 0.5rem; border-radius:0.4rem; background:${statusBg}; color:${statusColor}; margin-bottom:0.5rem;">
         ${escapeHtml(ans.status || "Not Assessed")}

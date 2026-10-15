@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="style.css?v=20261015-1510">
+  <link rel="stylesheet" href="style.css?v=20261015-1530">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 </head>
 <body>
@@ -73,6 +73,17 @@
 
   <!-- VIEW 2: PARTICIPANT WORKSHEET VIEW -->
   <div id="worksheet-view" style="display: none; flex-direction: column; min-height: 100vh;">
+    <!-- FACILITATOR INSPECTOR LIVE BANNER (Visible only when inspecting from Admin) -->
+    <div id="inspector-top-banner" class="inspector-live-banner" style="display: none;">
+      <div class="inspector-live-banner-title">
+        <span>🔍</span>
+        <span id="inspector-banner-text">FACILITATOR INSPECTOR: Live Submission Inspection</span>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-sm" style="background:#ffffff; color:var(--primary-navy); font-weight:800; border:none;" onclick="returnToAdminDesk()">← Return to Facilitator Dashboard</button>
+      </div>
+    </div>
+
     <!-- App Navigation Header -->
     <header class="app-header">
       <div class="container header-inner">
@@ -258,11 +269,51 @@
     </main>
   </div>
 
+  <!-- MODAL: DETAILED SUBMISSION INSPECTOR -->
+  <div id="inspector-modal" class="inspector-modal-backdrop" style="display: none;" onclick="handleModalBackdropClick(event)">
+    <div class="inspector-modal-card" onclick="event.stopPropagation()">
+      <div class="inspector-modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+            <span class="inspector-sector-badge" id="insp-dept-badge">🏥 HEALTH</span>
+            <span class="admin-participant-prog" id="insp-prog-badge" style="background:#fef3c7; color:#92400e; font-size: 0.75rem;">1 / 14 Completed</span>
+          </div>
+          <h2 id="insp-title" style="font-size: 1.25rem; font-weight: 800; color: var(--primary-navy); margin: 0;">Participant Inspection</h2>
+          <p id="insp-subtitle" style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Table: Table - sheraz | Last saved: 03:22 PM</p>
+        </div>
+        <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn-sm" style="background:#f1f5f9; font-weight:700;" onclick="exportCurrentInspector('xlsx')" title="Download Excel for this participant/group">📥 Excel</button>
+          <button type="button" class="btn-sm" style="background:#f1f5f9; font-weight:700;" onclick="exportCurrentInspector('docx')" title="Download Word for this participant/group">📄 Word</button>
+          <button type="button" class="btn-sm" style="background: var(--primary-navy); color: #ffffff; font-weight:700;" onclick="openInspectorInWorksheet()" title="Open interactive worksheet view">🔍 Full View</button>
+          <button type="button" class="btn-close-modal" onclick="closeInspectorModal()" title="Close Inspector">✕</button>
+        </div>
+      </div>
+
+      <!-- Filter pills inside modal -->
+      <div class="inspector-filter-bar">
+        <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">View:</span>
+        <button type="button" class="insp-filter-btn active" id="insp-flt-all" onclick="filterInspectorCards('all')">All 14 Indicators</button>
+        <button type="button" class="insp-filter-btn" id="insp-flt-done" onclick="filterInspectorCards('done')">Answered Only (<span id="insp-cnt-done">0</span>)</button>
+        <button type="button" class="insp-filter-btn" id="insp-flt-todo" onclick="filterInspectorCards('todo')">Unanswered (<span id="insp-cnt-todo">14</span>)</button>
+      </div>
+
+      <!-- 14 Cards Inspector Content -->
+      <div class="inspector-modal-body" id="inspector-cards-list">
+        <!-- Dynamically populated by app.js -->
+      </div>
+
+      <div class="inspector-modal-footer">
+        <span id="insp-footer-summary" style="font-size: 0.825rem; color: var(--text-muted); font-weight: 600;">0 of 14 Completed (0%)</span>
+        <button type="button" class="btn-sm" style="background:#f1f5f9; font-weight:700;" onclick="closeInspectorModal()">Close Inspector</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Box -->
   <div id="toast" class="toast-notice">Notice</div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=20261015-1510"></script>
+  <script src="app.js?v=20261015-1530"></script>
   <script>
     // Fallback if cached app.js exists
     window.addEventListener('error', function(e) {
