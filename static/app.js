@@ -852,7 +852,7 @@ async function refreshAdminData() {
 
   // 2. Poll cloud sync topic for live submissions
   try {
-    const cloudRes = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1");
+    const cloudRes = await fetch("https://ntfy.sh/cppr_workshop_affan_submissions/json?poll=1&since=all");
     if (cloudRes.ok) {
       const text = await cloudRes.text();
       const lines = text.trim().split("\n");
