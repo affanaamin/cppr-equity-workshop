@@ -855,9 +855,8 @@ function loadLocalResponses(secKey) {
   }
 
   // CRITICAL INSPECTION / CLOUD SYNC:
-  // If local responses have no answers, pull from adminSubmissionsCache (loaded from ntfy.sh or server)
-  const localAnswersCount = Object.keys(currentResponses.answers || {}).length;
-  if (localAnswersCount === 0 && adminSubmissionsCache && adminSubmissionsCache[secKey]) {
+  // Merge missing indicators from adminSubmissionsCache (or baseline) so incomplete drafts get the full answers
+  if (adminSubmissionsCache && adminSubmissionsCache[secKey]) {
     const subData = adminSubmissionsCache[secKey];
     if (currentParticipant) {
       const partsMap = subData.participants || {};
@@ -871,15 +870,30 @@ function loadLocalResponses(secKey) {
           }
         }
       }
-      if (match && match.answers && Object.keys(match.answers).length > 0) {
-        currentResponses.answers = { ...match.answers };
+      if (match && match.answers) {
+        currentResponses.answers = currentResponses.answers || {};
+        for (const cid in match.answers) {
+          if (!currentResponses.answers[cid] || !currentResponses.answers[cid].evidence) {
+            currentResponses.answers[cid] = { ...match.answers[cid] };
+          }
+        }
         currentResponses.table_number = match.table_number || currentResponses.table_number || currentParticipant;
-        currentResponses.last_saved = match.last_saved || "";
+        currentResponses.last_saved = match.last_saved || currentResponses.last_saved;
       }
-    } else {
-      if (subData.answers && Object.keys(subData.answers).length > 0) {
-        currentResponses.answers = { ...subData.answers };
-        currentResponses.table_number = subData.table_number || "";
+    }
+    
+    // Also merge from departmental baseline
+    if (subData.answers) {
+      currentResponses.answers = currentResponses.answers || {};
+      for (const cid in subData.answers) {
+        if (!currentResponses.answers[cid] || !currentResponses.answers[cid].evidence) {
+          currentResponses.answers[cid] = { ...subData.answers[cid] };
+        }
+      }
+      if (!currentResponses.table_number) {
+        currentResponses.table_number = subData.table_number || `Table - ${secKey}`;
+      }
+      if (!currentResponses.last_saved) {
         currentResponses.last_saved = subData.last_saved || "";
       }
     }
@@ -887,6 +901,9 @@ function loadLocalResponses(secKey) {
 }
 
 async function fetchServerResponses(secKey) {
+  let loadedData = null;
+
+  // 1. Try local or server API
   try {
     let url = `/api/submissions/${secKey}`;
     if (currentParticipant) {
@@ -894,15 +911,58 @@ async function fetchServerResponses(secKey) {
     }
     const res = await fetch(url);
     if (res.ok) {
-      const serverData = await res.json();
-      if (serverData && serverData.answers && Object.keys(serverData.answers).length > 0) {
-        // Merge server responses with local responses
-        currentResponses.table_number = serverData.table_number || currentResponses.table_number || (currentParticipant || "");
-        currentResponses.answers = { ...serverData.answers, ...currentResponses.answers };
+      loadedData = await res.json();
+    }
+  } catch (err) {}
+
+  // 2. Fallback to baseline_submissions.json (essential for GitHub Pages static hosting!)
+  if (!loadedData || !loadedData.answers || Object.keys(loadedData.answers).length === 0) {
+    try {
+      const bRes = await fetch(`baseline_submissions.json?v=20261016-${Date.now()}`);
+      if (bRes.ok) {
+        const allBaseline = await bRes.json();
+        if (allBaseline && allBaseline[secKey]) {
+          loadedData = allBaseline[secKey];
+        }
+      }
+    } catch (err) {}
+  }
+
+  // 3. Deep-merge baseline/server data into currentResponses
+  if (loadedData && loadedData.answers && Object.keys(loadedData.answers).length > 0) {
+    if (!currentResponses.table_number) {
+      currentResponses.table_number = loadedData.table_number || `Table - ${secKey}`;
+    }
+    if (!currentResponses.last_saved) {
+      currentResponses.last_saved = loadedData.last_saved || "";
+    }
+
+    currentResponses.answers = currentResponses.answers || {};
+    for (const cid in loadedData.answers) {
+      const bAns = loadedData.answers[cid];
+      if (!currentResponses.answers[cid]) {
+        currentResponses.answers[cid] = bAns;
+      } else {
+        const curAns = currentResponses.answers[cid];
+        if (!curAns.evidence || !curAns.evidence.trim()) {
+          currentResponses.answers[cid] = { ...bAns, ...curAns };
+          if (bAns.evidence) currentResponses.answers[cid].evidence = bAns.evidence;
+          if (bAns.rationale && !curAns.rationale) currentResponses.answers[cid].rationale = bAns.rationale;
+          if (bAns.status && !curAns.status) currentResponses.answers[cid].status = bAns.status;
+          if (bAns.page_ref && !curAns.page_ref) currentResponses.answers[cid].page_ref = bAns.page_ref;
+          if (bAns.pdf_searched && !curAns.pdf_searched) currentResponses.answers[cid].pdf_searched = bAns.pdf_searched;
+          if (bAns.dimensions && (!curAns.dimensions || curAns.dimensions.length === 0)) currentResponses.answers[cid].dimensions = bAns.dimensions;
+        }
       }
     }
-  } catch (err) {
-    console.warn("Could not sync with server, using local data:", err);
+
+    const storageKey = getStorageKey(secKey, currentParticipant);
+    localStorage.setItem(storageKey, JSON.stringify(currentResponses));
+    const secInfo = appData && appData.sectors[secKey];
+    if (secInfo) {
+      renderCards(secInfo);
+      updateProgress();
+    }
   }
 }
 
@@ -1700,8 +1760,31 @@ async function refreshAdminData() {
           }
         }
       });
+    } else {
+      // Static hosting fallback (GitHub Pages)
+      const bRes = await fetch(`baseline_submissions.json?v=20261016-${Date.now()}`);
+      if (bRes.ok) {
+        const baseSubmissions = await bRes.json();
+        Object.keys(baseSubmissions).forEach(k => {
+          if (newCache[k]) {
+            newCache[k] = { ...newCache[k], ...baseSubmissions[k] };
+          }
+        });
+      }
     }
-  } catch (err) {}
+  } catch (err) {
+    try {
+      const bRes = await fetch(`baseline_submissions.json?v=20261016-${Date.now()}`);
+      if (bRes.ok) {
+        const baseSubmissions = await bRes.json();
+        Object.keys(baseSubmissions).forEach(k => {
+          if (newCache[k]) {
+            newCache[k] = { ...newCache[k], ...baseSubmissions[k] };
+          }
+        });
+      }
+    } catch(bErr) {}
+  }
 
   // 2. Poll cloud sync topic for live submissions
   try {

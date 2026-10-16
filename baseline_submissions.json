@@ -1,0 +1,246 @@
+{
+  "health": {
+    "sector": "health",
+    "participant_name": "",
+    "table_number": "Table - health",
+    "completed_count": 4,
+    "total_count": 14,
+    "completion_pct": 29,
+    "last_saved": "10:34 PM",
+    "answers": {
+      "A5": {
+        "status": "NO",
+        "pdf_searched": "Citizen_Budget_2024-25.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 22 / PDF p. 23",
+        "evidence": "",
+        "dimensions": [],
+        "rationale": "No Evidence provided on viewer pages"
+      },
+      "B1": {
+        "status": "PARTIAL",
+        "pdf_searched": "BESD_2019-22_Output_Based_Health.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 27 / PDF p. 31",
+        "evidence": "Section 2. Measurable reduction in the burden of disease especially among vulnerable segments of the population \n2.1 Preventive healthcare services focusing child immunization, reproductive health and malnutrition in vulnerable segments of the society",
+        "dimensions": [
+          "Age (Infants / Children / Youth)",
+          "Physical Disability (PWDs)"
+        ],
+        "rationale": "Achievements 2018-19: In 2018, the target of the new born childred was 10849661- out of which 9885529/-were vaccinated with\ntotal coverage of 91 %. 95% children under one year age were vaccinated on Penta-I, the coverage of\nPenta-2 and Penta -3were 86% and 83%."
+      },
+      "B2": {
+        "status": "PARTIAL",
+        "pdf_searched": "BESD_2019-22_Output_Based_Health.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 27 / PDF p. 31",
+        "evidence": "Vision : “Work towards a healthy population in partnership with the private sector and civil society and develop effective and efficient healthcare systems targeted towards women in reproductive age and critical illness coverage\n\n”4. Improved governance and accountability : 4.1 4.1 Improved accountability and transparency for quality health services \n5. Improved health regulation",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)"
+        ],
+        "rationale": "vision and policy has covered : Building upon and improving health delivery systems and health management systems to achieve health SDG 3 (previously MDGs 4, 5 & 6)"
+      },
+      "B3": {
+        "status": "PARTIAL",
+        "pdf_searched": "Annual_Budget_Statement_2023-24.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 61 / PDF p. 62",
+        "evidence": "XXI - GENERAL ABSTRACT OF DISBURSEMENT (SETTLED+MERGED DISTRICT) 18,625.908m for FY 2022-23 and Revised 6,234.812m and for 2023-24 was 2,508.836m\nMerged Districts 966.121, 77.055,  579.858",
+        "dimensions": [
+          "Ethnicity / Merged Tribal Areas"
+        ],
+        "rationale": "In the Annual Budget Statement budget was allocated for  both settled and Merged Districts"
+      }
+    },
+    "participants": {}
+  },
+  "local": {
+    "sector": "local",
+    "participant_name": "",
+    "table_number": "Table - local",
+    "completed_count": 4,
+    "total_count": 14,
+    "completion_pct": 29,
+    "last_saved": "02:28 PM",
+    "answers": {
+      "A5": {
+        "status": "YES",
+        "pdf_searched": "BESD_2018-21_Local_Government.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 143 / PDF p. 147",
+        "evidence": "Pink Buses for\nwomen in Peshawar, Mardan, Abbottabad. Introduction of pre, mid, final and post terms monitoring and\nevaluation mechanism in project implementation.",
+        "dimensions": [
+          "Gender (Women & Girls)"
+        ],
+        "rationale": "Yes the gender has been explicitly represented in the budget document for Local Government."
+      },
+      "B1": {
+        "status": "PARTIAL",
+        "pdf_searched": "BESD_2018-21_Local_Government.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 1 / PDF p. 5",
+        "evidence": "The budget guidelines issued via Budget Call Circular 2018-19 and Annual Development Program (ADP)\nguidelines require all the Administrative Departments to have gender disaggregated key performance\nindicators. The purpose of this initiative is to make visible the effect of the steps taken by the Government\nfor mainstreaming gender equity and make assessments of the funds that are being spent on having\ngender equality and equity in Government operations. Like previous year, this year eight Provincial Line\nDepartments continued using gender disaggregated information for Key Performance Indicators on public\nservice delivery, capacity building efforts etc. and planned several activities for the forthcoming years to\npromote gender equity and equality.",
+        "dimensions": [
+          "Ethnicity / Merged Tribal Areas",
+          "Culture & Heritage"
+        ],
+        "rationale": "Ethnicity and culture heritage have not been explicitly mentioned in the budget document."
+      },
+      "B2": {
+        "status": "IN PROGRESS",
+        "pdf_searched": "BESD_2018-21_Local_Government.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 144 / PDF p. 150",
+        "evidence": "yes",
+        "dimensions": [],
+        "rationale": ""
+      },
+      "B3": {
+        "status": "YES",
+        "pdf_searched": "BESD_2018-21_Local_Government.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 4 / PDF p. 6",
+        "evidence": "This would enable Parliament and other stakeholders to assess whether value for money in terms of delivery of services is\nachieved.",
+        "dimensions": [],
+        "rationale": "all the sections are mentioned"
+      }
+    },
+    "participants": {}
+  },
+  "education": {
+    "sector": "education",
+    "participant_name": "",
+    "table_number": "Table - education",
+    "completed_count": 5,
+    "total_count": 14,
+    "completion_pct": 36,
+    "last_saved": "11:08 PM",
+    "answers": {
+      "A5": {
+        "status": "PARTIAL",
+        "pdf_searched": "White_Paper_2018-19.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 63 / PDF p. 72",
+        "evidence": "“The Government of Khyber Pakhtunkhwa has urged all the Administrative Departments to have gender disaggregated KPIs, as also provisioned in the guidelines of the Budget Call Circular 2016-17.”\n“Local governments also provide a range of fora to the marginalized groups of the society, including women, industrial workers, peasants, religious minorities and youth in particular.”\n“Local governments also provide a range of fora to the marginalized groups of the society, including women, industrial workers, peasants, religious minorities and youth in particular.”\n“Citizen’s engagement in budget preparation has been ensured by creating online opinion polls on website of Finance Department”\n\n",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)",
+          "Religion (Minorities)"
+        ],
+        "rationale": "Gender-responsive planning is evidenced, but participation by women’s CSOs is not established.\nYouth are named as a group with local-government forums; participation in this education budget stage is not established.\nReligious minorities are mentioned, but education-budget participation is not demonstrated.\n"
+      },
+      "B1": {
+        "status": "PARTIAL",
+        "pdf_searched": "White_Paper_2018-19.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 65 / PDF p. 74",
+        "evidence": "1 The Government of Khyber Pakhtunkhwa has urged all the Administrative Departments to have gender disaggregated KPIs, as also provisioned in the guidelines of the Budget Call Circular 2016-17.”\n2 Focus on women, girls and marginalized groups in key policy and planning documents: PFM Reform Strategy, Citizen’s Budget, White Paper, Budget Call Circular, and Output-Based Budget",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)"
+        ],
+        "rationale": "1 Directly links gender-disaggregated KPIs to Budget Call Circular guidance.\n2 Marginalised groups are named, but detailed circular requirements for all groups are not reproduced."
+      },
+      "B2": {
+        "status": "PARTIAL",
+        "pdf_searched": "BESD_2016-19_Education.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 18-21 / PDF p. 26-29",
+        "evidence": "1 \"2.3 Provision of education to all through minimizing social and gender disparity\"\n2 “Gross Enrolment (GER) Primary Schools (Kachi to class 5) … Secondary Schools (class 6 to 10th)”\n3 “2.3 Provision of education to all through minimizing social and gender disparity”",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)"
+        ],
+        "rationale": "1 An equity-related education objective is linked to budget outputs and performance indicators.\n2 Education-stage indicators provide a partial age/stage-related measure.\n3 Broad disparity reduction is stated, but minority-specific targets are not identified."
+      },
+      "B3": {
+        "status": "PARTIAL",
+        "pdf_searched": "BESD_2016-19_Education.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 17,21 / PDF p. 25,29",
+        "evidence": "1 “Continue gender sensitive allocation in development schemes at the ratio of 70:30 for Girls: Boys to remove gender inequities in education”\n2 “Number of female students provided with stipends”",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)"
+        ],
+        "rationale": "1 A gender-sensitive allocation approach appears in the budget supporting document; this does not prove that the enacted law itself contains the provision.\n2 Student-support targets are reported; broader age-based equity information is limited.\n"
+      },
+      "B4": {
+        "status": "",
+        "pdf_searched": "BESD_2016-19_Education.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "",
+        "evidence": "1 “incorporating citizens’ voice in budget through pre-budget consultations”\n2 “Citizen’s engagement in budget preparation has been ensured by creating online opinion polls on website of Finance Department” Minority status",
+        "dimensions": [],
+        "rationale": ""
+      }
+    },
+    "participants": {}
+  },
+  "finance": {
+    "sector": "finance",
+    "participant_name": "",
+    "table_number": "Table - finance",
+    "completed_count": 3,
+    "total_count": 14,
+    "completion_pct": 21,
+    "last_saved": "02:28 PM",
+    "answers": {
+      "A5": {
+        "status": "PARTIAL",
+        "pdf_searched": "Integrated_Budget_Call_Circular_2024-25.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 10 / PDF p. 11",
+        "evidence": "Gender-responsive budgeting is an approach designed to mainstream the gender dimension into all\nstages of the budget cycle. In general, gender responsive budgeting aims at analyzing the different impacts of fiscal\npolicy on men and women respectively. In addition to the impact analysis, gender responsive budgeting comprises\nmaking proposals to reprioritize expenditures and revenues, taking into account the different needs and priorities of\nwomen and men, other factors of inequality may also be focused on, such as age, religious or ethnic affiliation, or\nthe place of residence (urban/rural).\nFurthermore, the government seeks to determine the fiscal burden it has to bear to combat climate\nconsequences that will inform its resource mobilization efforts besides improving allocative efficiency. In this regard,\nthe line departments are requested to prepare budget submissions and project proposals taking into account climate\nperspective.",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)",
+          "Religion (Minorities)",
+          "Ethnicity / Merged Tribal Areas"
+        ],
+        "rationale": "section 9 page 10 recognizes gender responsive budgeting and the need to consider inequalities associated with age, religion, ethnicity and geographical location sans a proper mehcanism."
+      },
+      "B1": {
+        "status": "YES",
+        "pdf_searched": "Integrated_Budget_Call_Circular_2024-25.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 10 / PDF p. 11",
+        "evidence": "Gender-responsive budgeting is an approach designed to mainstream the gender dimension into all\nstages of the budget cycle. In general, gender responsive budgeting aims at analyzing the different impacts of fiscal\npolicy on men and women respectively. In addition to the impact analysis, gender responsive budgeting comprises\nmaking proposals to reprioritize expenditures and revenues, taking into account the different needs and priorities of\nwomen and men, other factors of inequality may also be focused on, such as age, religious or ethnic affiliation, or\nthe place of residence (urban/rural).\nFurthermore, the government seeks to determine the fiscal burden it has to bear to combat climate\nconsequences that will inform its resource mobilization efforts besides improving allocative efficiency. In this regard,\nthe line departments are requested to prepare budget submissions and project proposals taking into account climate\nperspective.",
+        "dimensions": [
+          "Gender (Women & Girls)",
+          "Age (Infants / Children / Youth)",
+          "Ethnicity / Merged Tribal Areas",
+          "Religion (Minorities)"
+        ],
+        "rationale": "The budget guidlines for equity are explicity institutionalised."
+      },
+      "B2": {
+        "status": "IN PROGRESS",
+        "pdf_searched": "Integrated_Budget_Call_Circular_2024-25.pdf",
+        "book_page": "",
+        "pdf_page": "",
+        "page_ref": "Doc p. 9",
+        "evidence": "Gender-responsive budgeting is an approach designed to mainstream the gender dimension into all\nstages of the budget cycle. In general, gender responsive budgeting aims at analyzing the different impacts of fiscal\npolicy on men and women respectively. In addition to the impact analysis, gender responsive budgeting comprises\nmaking proposals to reprioritize expenditures and revenues, taking into account the different needs and priorities of\nwomen and men, other factors of inequality may also be focused on, such as age, religious or ethnic affiliation, or\nthe place of residence (urban/rural).\nFurthermore, the government seeks to determine the fiscal burden it has to bear to combat climate\nconsequences that will inform its resource mobilization efforts besides improving allocative efficiency. In this regard,\nthe line departments are requested to prepare budget submissions and project proposals taking into account climate\nperspective.",
+        "dimensions": [],
+        "rationale": ""
+      }
+    },
+    "participants": {}
+  }
+}
