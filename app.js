@@ -575,8 +575,15 @@ function quickSelectSector(secCode) {
   openSector(secCode);
 }
 
-let appleScrollObserver = null;
-let appleScrollListenersBound = false;
+let appleCinemaRafPending = false;
+let appleCinemaListenersBound = false;
+
+const APPLE_SCENE_WINDOWS = [
+  { enterStart: -1, enterEnd: -1, exitStart: 0.10, exitEnd: 0.26, holdP: 0.00 },
+  { enterStart: 0.18, enterEnd: 0.32, exitStart: 0.46, exitEnd: 0.58, holdP: 0.38 },
+  { enterStart: 0.50, enterEnd: 0.62, exitStart: 0.74, exitEnd: 0.85, holdP: 0.68 },
+  { enterStart: 0.78, enterEnd: 0.89, exitStart: 0.96, exitEnd: 1.00, holdP: 0.92 }
+];
 
 function animateCountUp(statEl) {
   if (!statEl || statEl.dataset.counted === "1") return;
@@ -609,87 +616,237 @@ function animateCountUp(statEl) {
   requestAnimationFrame(step);
 }
 
-function initAppleScrollExperience() {
-  const revealEls = document.querySelectorAll(".scroll-reveal");
-  if (!revealEls.length) return;
+function clamp01(v) {
+  return Math.min(1, Math.max(0, v));
+}
 
-  const markVisible = (el) => {
-    el.classList.add("is-visible");
-    el.querySelectorAll("[data-count-target]").forEach(animateCountUp);
-  };
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
 
-  if ("IntersectionObserver" in window) {
-    if (appleScrollObserver) appleScrollObserver.disconnect();
-    appleScrollObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          markVisible(entry.target);
-          appleScrollObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.14, rootMargin: "0px 0px -40px 0px" });
+function easeInCubic(t) {
+  return t * t * t;
+}
 
-    revealEls.forEach(el => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.94 && rect.bottom > 0) {
-        markVisible(el);
+function updateAppleCinemaScroll() {
+  const cover = document.getElementById("apple-cover-screen");
+  const track = document.getElementById("apple-cinema-track");
+  const mainCard = document.getElementById("login-card-main");
+  const launchStage = document.getElementById("apple-launchpad-stage");
+  const launchIntro = document.getElementById("apple-launchpad-intro");
+  if (!track || !cover || cover.style.display === "none") {
+    if (mainCard) {
+      mainCard.style.opacity = "";
+      mainCard.style.transform = "";
+      mainCard.style.filter = "";
+    }
+    return;
+  }
+
+  const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const scrollBar = document.getElementById("apple-scroll-bar");
+  const docHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+  if (scrollBar) {
+    scrollBar.style.width = `${clamp01(window.scrollY / docHeight) * 100}%`;
+  }
+
+  const rect = track.getBoundingClientRect();
+  const scrollable = Math.max(track.offsetHeight - window.innerHeight, 1);
+  const p = clamp01(-rect.top / scrollable);
+
+  const scenes = document.querySelectorAll(".apple-scene");
+  let activeDotIdx = 0;
+  let bestAlpha = -1;
+
+  scenes.forEach((scene, idx) => {
+    const win = APPLE_SCENE_WINDOWS[idx];
+    if (!win) return;
+
+    if (reducedMotion) {
+      scene.style.opacity = "1";
+      scene.style.transform = "none";
+      scene.style.filter = "none";
+      scene.style.pointerEvents = "auto";
+      return;
+    }
+
+    let alpha = 1;
+    let scale = 1;
+    let translateY = 0;
+    let blur = 0;
+
+    if (win.enterStart >= 0 && p < win.enterStart) {
+      alpha = 0;
+      scale = 0.86;
+      translateY = 56;
+      blur = 12;
+    } else if (win.enterStart >= 0 && p < win.enterEnd) {
+      const t = easeOutCubic(clamp01((p - win.enterStart) / Math.max(win.enterEnd - win.enterStart, 0.001)));
+      alpha = t;
+      scale = 0.86 + 0.14 * t;
+      translateY = 56 * (1 - t);
+      blur = 12 * (1 - t);
+    } else if (p > win.exitEnd) {
+      alpha = 0;
+      scale = 1.14;
+      translateY = -56;
+      blur = 12;
+    } else if (p > win.exitStart) {
+      const t = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
+      alpha = 1 - t;
+      scale = 1 + 0.14 * t;
+      translateY = -56 * t;
+      blur = 12 * t;
+    }
+
+    scene.style.opacity = alpha.toFixed(3);
+    scene.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
+    scene.style.filter = blur > 0.15 ? `blur(${blur.toFixed(1)}px)` : "none";
+    scene.style.pointerEvents = alpha > 0.35 ? "auto" : "none";
+    scene.classList.toggle("is-active-scene", alpha > 0.35);
+
+    if (alpha > bestAlpha) {
+      bestAlpha = alpha;
+      activeDotIdx = idx;
+    }
+
+    // Stagger individual cards cleanly inside each entering/exiting scene
+    const children = scene.querySelectorAll(".apple-scene-child");
+    children.forEach((child, cIdx) => {
+      const staggerShift = (cIdx % 5) * 0.018;
+      if (win.enterStart >= 0 && p < win.enterEnd + staggerShift) {
+        const ct = easeOutCubic(clamp01((p - (win.enterStart + staggerShift * 0.7)) / Math.max(win.enterEnd - win.enterStart, 0.001)));
+        child.style.opacity = ct.toFixed(3);
+        child.style.transform = `translate3d(0, ${(22 * (1 - ct)).toFixed(1)}px, 0) scale(${(0.95 + 0.05 * ct).toFixed(4)})`;
       } else {
-        appleScrollObserver.observe(el);
+        child.style.opacity = "";
+        child.style.transform = "";
       }
     });
-  } else {
-    revealEls.forEach(markVisible);
+
+    // Re-trigger count-up numbers when Scene 1 appears and reset if scrolled away to 0
+    if (idx === 1) {
+      const stats = scene.querySelectorAll("[data-count-target]");
+      if (alpha > 0.4) {
+        stats.forEach(animateCountUp);
+      } else if (alpha === 0 && p < win.enterStart) {
+        stats.forEach(s => { s.dataset.counted = "0"; });
+      }
+    }
+  });
+
+  // Animate ambient orbs softly across the journey
+  const stickyEl = document.getElementById("apple-cinema-sticky");
+  if (stickyEl) {
+    stickyEl.style.setProperty("--cinema-p", p.toFixed(4));
   }
 
+  // Bidirectional entrance/exit on the bottom Workshop Launchpad
+  if (launchStage && mainCard && !reducedMotion) {
+    const lRect = launchStage.getBoundingClientRect();
+    const enterRatio = clamp01((window.innerHeight - lRect.top) / Math.max(window.innerHeight * 0.55, 1));
+    const lt = easeOutCubic(enterRatio);
+    const lAlpha = lt;
+    const lScale = 0.9 + 0.1 * lt;
+    const lY = 40 * (1 - lt);
+    const lBlur = 10 * (1 - lt);
+    const applyLaunchStyle = (el) => {
+      el.style.opacity = lAlpha.toFixed(3);
+      el.style.transform = `translate3d(0, ${lY.toFixed(1)}px, 0) scale(${lScale.toFixed(4)})`;
+      el.style.filter = lBlur > 0.15 ? `blur(${lBlur.toFixed(1)}px)` : "none";
+    };
+    applyLaunchStyle(mainCard);
+    if (launchIntro) applyLaunchStyle(launchIntro);
+    if (enterRatio > 0.55) activeDotIdx = 4;
+  }
+
+  document.querySelectorAll(".apple-scene-dot").forEach(dot => {
+    const dIdx = parseInt(dot.getAttribute("data-dot"), 10);
+    dot.classList.toggle("active", dIdx === activeDotIdx);
+  });
+}
+
+function scheduleAppleCinemaUpdate() {
+  if (appleCinemaRafPending) return;
+  appleCinemaRafPending = true;
+  requestAnimationFrame(() => {
+    appleCinemaRafPending = false;
+    updateAppleCinemaScroll();
+  });
+}
+
+function initAppleScrollExperience() {
+  updateAppleCinemaScroll();
   if (!appleScrollListenersBound) {
     appleScrollListenersBound = true;
-    window.addEventListener("scroll", () => {
-      const cover = document.getElementById("apple-cover-screen");
-      if (!cover || cover.style.display === "none") return;
-
-      const scrollBar = document.getElementById("apple-scroll-bar");
-      const docHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      const pct = Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100));
-      if (scrollBar) scrollBar.style.width = `${pct}%`;
-
-      const heroBox = document.getElementById("apple-hero-box");
-      if (heroBox) {
-        const heroProgress = Math.min(1, Math.max(0, window.scrollY / Math.max(window.innerHeight * 0.75, 1)));
-        heroBox.style.setProperty("--hero-scroll", heroProgress.toFixed(3));
-      }
-    }, { passive: true });
+    window.addEventListener("scroll", scheduleAppleCinemaUpdate, { passive: true });
+    window.addEventListener("resize", scheduleAppleCinemaUpdate, { passive: true });
   }
+}
+
+function scrollToAppleScene(sceneIdx) {
+  if (sceneIdx === 4) {
+    const launchpad = document.getElementById("apple-launchpad-stage") || document.getElementById("login-card-main");
+    if (launchpad) launchpad.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  const track = document.getElementById("apple-cinema-track");
+  const win = APPLE_SCENE_WINDOWS[sceneIdx];
+  if (!track || !win) return;
+  if (sceneIdx === 0) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const trackTop = window.scrollY + track.getBoundingClientRect().top;
+  const scrollable = Math.max(track.offsetHeight - window.innerHeight, 1);
+  const targetY = trackTop + win.holdP * scrollable;
+  window.scrollTo({ top: targetY, behavior: "smooth" });
 }
 
 function enterWorkshopFromCover(focusInput = true) {
   const cover = document.getElementById("apple-cover-screen");
+  const launchIntro = document.getElementById("apple-launchpad-intro");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
   sessionStorage.setItem("cppr_cover_dismissed", "1");
   if (partCard) partCard.style.display = "none";
-  if (cover && cover.style.display !== "none") {
-    cover.classList.add("cover-exit");
-    setTimeout(() => {
+
+  const finalizeReveal = () => {
+    if (cover) {
       cover.style.display = "none";
       cover.classList.remove("cover-exit");
-      if (mainCard) {
-        mainCard.style.display = "block";
-        mainCard.classList.add("is-visible", "apple-reveal");
-      }
-      if (focusInput) {
-        const inp = document.getElementById("sector-input");
-        if (inp) inp.focus();
-      }
-    }, 240);
-  } else if (mainCard) {
-    mainCard.style.display = "block";
-    mainCard.classList.add("is-visible");
+    }
+    if (launchIntro) {
+      launchIntro.style.display = "none";
+      launchIntro.style.opacity = "";
+      launchIntro.style.transform = "";
+      launchIntro.style.filter = "";
+    }
+    if (mainCard) {
+      mainCard.style.display = "block";
+      mainCard.style.opacity = "1";
+      mainCard.style.transform = "none";
+      mainCard.style.filter = "none";
+      mainCard.classList.add("apple-reveal");
+    }
+    if (focusInput) {
+      const inp = document.getElementById("sector-input");
+      if (inp) inp.focus();
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (cover && cover.style.display !== "none") {
+    cover.classList.add("cover-exit");
+    setTimeout(finalizeReveal, 240);
+  } else {
+    finalizeReveal();
   }
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showCoverBriefing() {
   const cover = document.getElementById("apple-cover-screen");
+  const launchIntro = document.getElementById("apple-launchpad-intro");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
   sessionStorage.removeItem("cppr_cover_dismissed");
@@ -698,12 +855,10 @@ function showCoverBriefing() {
     cover.style.display = "flex";
     cover.classList.add("apple-reveal");
   }
-  if (mainCard) {
-    mainCard.style.display = "block";
-    mainCard.classList.add("is-visible");
-  }
+  if (launchIntro) launchIntro.style.display = "block";
+  if (mainCard) mainCard.style.display = "block";
+  window.scrollTo({ top: 0, behavior: "auto" });
   initAppleScrollExperience();
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showParticipantPicker(participantName) {
@@ -717,6 +872,8 @@ function showParticipantPicker(participantName) {
   if (loginView) loginView.style.display = "flex";
   const cover = document.getElementById("apple-cover-screen");
   if (cover) cover.style.display = "none";
+  const launchIntro = document.getElementById("apple-launchpad-intro");
+  if (launchIntro) launchIntro.style.display = "none";
   const mainCard = document.getElementById("login-card-main");
   if (mainCard) mainCard.style.display = "none";
   const partCard = document.getElementById("participant-card");
@@ -873,6 +1030,7 @@ function showLoginView() {
   if (loginView) loginView.style.display = "flex";
 
   const cover = document.getElementById("apple-cover-screen");
+  const launchIntro = document.getElementById("apple-launchpad-intro");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
   const coverDismissed = sessionStorage.getItem("cppr_cover_dismissed") === "1";
@@ -880,16 +1038,19 @@ function showLoginView() {
   if (cover && mainCard) {
     if (coverDismissed) {
       cover.style.display = "none";
+      if (launchIntro) launchIntro.style.display = "none";
       mainCard.style.display = "block";
-      mainCard.classList.add("is-visible", "apple-reveal");
+      mainCard.style.opacity = "1";
+      mainCard.style.transform = "none";
+      mainCard.style.filter = "none";
+      mainCard.classList.add("apple-reveal");
     } else {
       cover.style.display = "flex";
+      if (launchIntro) launchIntro.style.display = "block";
       mainCard.style.display = "block";
-      mainCard.classList.add("is-visible");
     }
   } else if (mainCard) {
     mainCard.style.display = "block";
-    mainCard.classList.add("is-visible");
   }
 
   if (partCard) partCard.style.display = "none";
