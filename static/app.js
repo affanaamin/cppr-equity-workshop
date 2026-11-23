@@ -43,10 +43,15 @@ function initSectorLocks() {
   updateLoginPillsLockState();
 }
 
-function isSectorLocked(secKey) {
-  if (isFacilitatorInspectMode) return false; // Facilitator is never locked out
+function isRawSectorLocked(secKey) {
   if (!secKey) return false;
   return Boolean(sectorLocks[secKey]);
+}
+
+function isSectorLocked(secKey) {
+  if (isFacilitatorInspectMode) return false; // Facilitator is never locked out
+  if (currentParticipant && currentParticipant.trim()) return false; // Individual participants can use ANY sector regardless of lock
+  return isRawSectorLocked(secKey);
 }
 
 function toggleSectorLock(secKey) {
@@ -113,11 +118,11 @@ function updateAdminLockSummaryText() {
   if (!summaryEl) return;
   const lockedCount = Object.values(sectorLocks).filter(Boolean).length;
   if (lockedCount === 4) {
-    summaryEl.innerHTML = `<span style="color:#991b1b; font-weight:700;">🔒 All 4 departments are currently LOCKED</span> (Participants cannot enter or submit).`;
+    summaryEl.innerHTML = `<span style="color:#991b1b; font-weight:700;">🔒 Shared departmental views are LOCKED</span> (Individual participants can still enter any sector by typing their name).`;
   } else if (lockedCount === 0) {
-    summaryEl.innerHTML = `<span style="color:#166534; font-weight:700;">🔓 All 4 departments are UNLOCKED for Individual Evaluations</span>.`;
+    summaryEl.innerHTML = `<span style="color:#166534; font-weight:700;">🔓 All 4 departments are UNLOCKED</span> for both Group & Individual Evaluations.`;
   } else {
-    summaryEl.innerHTML = `<span style="color:#92400e; font-weight:700;">⚠️ ${lockedCount} of 4 departments LOCKED</span>, ${4 - lockedCount} open for individuals.`;
+    summaryEl.innerHTML = `<span style="color:#92400e; font-weight:700;">⚠️ ${lockedCount} of 4 shared views LOCKED</span>, ${4 - lockedCount} open for group access (Individuals can access all 4).`;
   }
 }
 
@@ -526,27 +531,8 @@ function quickSelectSector(secCode) {
     return;
   }
 
-  const secName = (appData && appData.sectors[secCode]) ? appData.sectors[secCode].display_title : secCode.toUpperCase();
-
-  // 1. If department is LOCKED by Facilitator in Admin
-  if (isSectorLocked(secCode)) {
-    showToast(`🔒 ${secName} is currently LOCKED by the Facilitator. Submissions and access are paused.`, true);
-    const inputEl = document.getElementById("sector-input");
-    if (inputEl) {
-      inputEl.style.borderColor = "#ef4444";
-      inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.25)";
-      inputEl.focus();
-      setTimeout(() => {
-        inputEl.style.borderColor = "";
-        inputEl.style.boxShadow = "";
-      }, 1500);
-    }
-    return;
-  }
-
-  // 2. Department is UNLOCKED!
-  // If participant is already logged in
-  if (currentParticipant) {
+  // If participant is already logged in individually, allow any sector regardless of lock
+  if (currentParticipant && currentParticipant.trim()) {
     selectParticipantSector(secCode);
     return;
   }
@@ -557,31 +543,99 @@ function quickSelectSector(secCode) {
   const norm = normalizeSectorCode(inputVal);
 
   if (inputVal.length >= 2 && !norm) {
-    // User typed their name in the bar and clicked a quick department pill
+    // Individual typed their name and clicked a department pill — always allowed!
     showParticipantPicker(inputVal);
     selectParticipantSector(secCode);
     return;
   }
 
-  // If no name was entered, open the Departmental Master View (Read-Only)
+  const secName = (appData && appData.sectors && appData.sectors[secCode])
+    ? appData.sectors[secCode].display_title
+    : secCode.toUpperCase();
+
+  // Only block anonymous/unidentified departmental master access when locked
+  if (isSectorLocked(secCode)) {
+    showToast(`🔒 ${secName} group view is locked. Type your individual name above to evaluate this sector!`, true);
+    if (inputEl) {
+      inputEl.style.borderColor = "#ef4444";
+      inputEl.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.2)";
+      inputEl.focus();
+      setTimeout(() => {
+        inputEl.style.borderColor = "";
+        inputEl.style.boxShadow = "";
+      }, 1800);
+    }
+    return;
+  }
+
+  // Department is unlocked and no name entered: open sector directly
   currentParticipant = null;
   sessionStorage.removeItem("cppr_participant_name");
   openSector(secCode);
+}
+
+function enterWorkshopFromCover(focusInput = true) {
+  const cover = document.getElementById("apple-cover-screen");
+  const mainCard = document.getElementById("login-card-main");
+  const partCard = document.getElementById("participant-card");
+  sessionStorage.setItem("cppr_cover_dismissed", "1");
+  if (partCard) partCard.style.display = "none";
+  if (cover) {
+    cover.classList.add("cover-exit");
+    setTimeout(() => {
+      cover.style.display = "none";
+      cover.classList.remove("cover-exit");
+      if (mainCard) {
+        mainCard.style.display = "block";
+        mainCard.classList.add("apple-reveal");
+      }
+      if (focusInput) {
+        const inp = document.getElementById("sector-input");
+        if (inp) inp.focus();
+      }
+    }, 240);
+  } else if (mainCard) {
+    mainCard.style.display = "block";
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showCoverBriefing() {
+  const cover = document.getElementById("apple-cover-screen");
+  const mainCard = document.getElementById("login-card-main");
+  const partCard = document.getElementById("participant-card");
+  sessionStorage.removeItem("cppr_cover_dismissed");
+  if (mainCard) mainCard.style.display = "none";
+  if (partCard) partCard.style.display = "none";
+  if (cover) {
+    cover.style.display = "block";
+    cover.classList.add("apple-reveal");
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function showParticipantPicker(participantName) {
   if (!participantName || !participantName.trim()) return;
   currentParticipant = participantName.trim();
   sessionStorage.setItem("cppr_participant_name", currentParticipant);
+  sessionStorage.setItem("cppr_cover_dismissed", "1");
   recordParticipant(currentParticipant);
 
-  document.getElementById("login-view").style.display = "flex";
+  const loginView = document.getElementById("login-view");
+  if (loginView) loginView.style.display = "flex";
+  const cover = document.getElementById("apple-cover-screen");
+  if (cover) cover.style.display = "none";
   const mainCard = document.getElementById("login-card-main");
   if (mainCard) mainCard.style.display = "none";
   const partCard = document.getElementById("participant-card");
-  if (partCard) partCard.style.display = "block";
-  document.getElementById("worksheet-view").style.display = "none";
-  document.getElementById("admin-view").style.display = "none";
+  if (partCard) {
+    partCard.style.display = "block";
+    partCard.classList.add("apple-reveal");
+  }
+  const wsView = document.getElementById("worksheet-view");
+  if (wsView) wsView.style.display = "none";
+  const adminView = document.getElementById("admin-view");
+  if (adminView) adminView.style.display = "none";
 
   const titleEl = document.getElementById("participant-welcome-title");
   const subEl = document.getElementById("participant-welcome-subtitle");
@@ -723,18 +777,43 @@ function renderRecentParticipantsList() {
 }
 
 function showLoginView() {
-  document.getElementById("login-view").style.display = "flex";
+  const loginView = document.getElementById("login-view");
+  if (loginView) loginView.style.display = "flex";
+
+  const cover = document.getElementById("apple-cover-screen");
   const mainCard = document.getElementById("login-card-main");
-  if (mainCard) mainCard.style.display = "block";
   const partCard = document.getElementById("participant-card");
+  const coverDismissed = sessionStorage.getItem("cppr_cover_dismissed") === "1";
+
+  if (cover && mainCard) {
+    if (coverDismissed) {
+      cover.style.display = "none";
+      mainCard.style.display = "block";
+      mainCard.classList.add("apple-reveal");
+    } else {
+      cover.style.display = "block";
+      cover.classList.add("apple-reveal");
+      mainCard.style.display = "none";
+    }
+  } else if (mainCard) {
+    mainCard.style.display = "block";
+  }
+
   if (partCard) partCard.style.display = "none";
-  document.getElementById("worksheet-view").style.display = "none";
-  document.getElementById("admin-view").style.display = "none";
+  const wsView = document.getElementById("worksheet-view");
+  if (wsView) wsView.style.display = "none";
+  const adminView = document.getElementById("admin-view");
+  if (adminView) adminView.style.display = "none";
+
   const inputEl = document.getElementById("sector-input");
-  inputEl.value = "";
+  if (inputEl) {
+    inputEl.value = "";
+    if (coverDismissed) {
+      setTimeout(() => inputEl.focus(), 100);
+    }
+  }
   renderRecentParticipantsList();
   updateLoginPillsLockState();
-  setTimeout(() => inputEl.focus(), 100);
 }
 
 function logoutSector() {
@@ -2123,7 +2202,7 @@ function renderAdminTeams(submissions) {
       }).join("");
     }
 
-    const isLocked = isSectorLocked(key);
+    const isLocked = isRawSectorLocked(key);
     const lockPillHtml = `<span class="sector-lock-pill ${isLocked ? 'locked' : 'unlocked'}">${isLocked ? '🔒 Locked' : '🔓 Active'}</span>`;
 
     const card = document.createElement("div");

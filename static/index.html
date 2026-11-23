@@ -3,18 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>CPPR Equity Budgeting Workshop — Digital Laboratory</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="style.css?v=20261123-minimal">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261123-apple">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 </head>
 <body>
 
-  <!-- VIEW 1: SINGLE-LINE LOGIN SCREEN -->
+  <!-- VIEW 1: APPLE / ASQSCHOLAR COVER & LOGIN SCREEN -->
   <div id="login-view" class="login-wrapper">
+    <!-- 1.0: INTRO COVER BRIEFING -->
+    <div id="apple-cover-screen" class="apple-cover-container apple-reveal">
+      <nav class="apple-cover-nav">
+        <div class="apple-partner-group">
+          <span class="apple-partner-pill"><strong>CPPR</strong> · IMSciences Peshawar</span>
+          <span class="apple-partner-pill">German Cooperation · GIZ</span>
+          <span class="apple-partner-pill">KPESED · Govt of KP</span>
+        </div>
+        <button type="button" class="apple-nav-cta" onclick="enterWorkshopFromCover(true)">Enter Workshop ➔</button>
+      </nav>
+
+      <header class="apple-hero">
+        <span class="apple-eyebrow-pill">EQUITY BUDGETING TOOL (EBT) · KHYBER PAKHTUNKHWA</span>
+        <h1 class="apple-hero-title">“Who does the budget actually reach?”</h1>
+        <p class="apple-hero-subtitle">Promoting Equity Budgeting in Public Service Delivery — ensuring government budgets are planned, allocated, executed, and monitored to reduce inequalities and reach marginalized groups.</p>
+        <div class="apple-hero-actions">
+          <button type="button" class="apple-btn-primary" onclick="enterWorkshopFromCover(true)">Launch Interactive Workshop ➔</button>
+          <a href="#apple-bento-facts" class="apple-btn-secondary">Key Findings &amp; Framework ↓</a>
+        </div>
+      </header>
+
+      <section id="apple-bento-facts" class="apple-bento-grid">
+        <article class="apple-bento-card" style="animation-delay: 0.05s;">
+          <div class="apple-bento-tag">KP EDUCATION DIVIDE · FY 2025–26</div>
+          <div class="apple-bento-stat">4.9M</div>
+          <div class="apple-bento-stat-label">Out-of-School Children Ages 5–16</div>
+          <p class="apple-bento-body">59% of out-of-school children are girls and 53% of dropouts are female. Out of KP's Rs. 363B education budget (17% of Rs. 2,119B total), most goes to recurring salaries — leaving only Rs. 5B for literacy and dropout reduction.</p>
+        </article>
+
+        <article class="apple-bento-card" style="animation-delay: 0.1s;">
+          <div class="apple-bento-tag">PHASE I EBT FINDING · REALITY CHECK</div>
+          <div class="apple-bento-stat">0 Green</div>
+          <div class="apple-bento-stat-label">Indicators Across the Budget Cycle</div>
+          <p class="apple-bento-body">Approved does not mean delivered. In Phase I, the Disability Rehabilitation Fund remained unspent and textbook delivery fell to 25–30%. Both lines passed planning and approval; neither passed an equity check.</p>
+        </article>
+
+        <article class="apple-bento-card" style="animation-delay: 0.15s;">
+          <div class="apple-bento-tag">LOCAL GOVERNANCE · ARTICLES 25, 25A &amp; 34–38</div>
+          <div class="apple-bento-stat">Rs. 52.8B</div>
+          <div class="apple-bento-stat-label">2026–27 Local Gov Development ADP</div>
+          <p class="apple-bento-body">Up from Rs. 12.0B (2005–15) and Rs. 291.5B (2019–26). Under the KP Local Government Act 2013 (Sections 25, 34 &amp; 36), councils must disaggregate KPIs, publish bi-annual execution reports (31 Dec &amp; 31 Jul), and hold public audit hearings.</p>
+        </article>
+
+        <article class="apple-bento-card" style="animation-delay: 0.2s;">
+          <div class="apple-bento-tag">BEYOND GENDER ALONE · INTERSECTIONAL LENS</div>
+          <div class="apple-bento-stat">7 + 1</div>
+          <div class="apple-bento-stat-label">Core Dimensions + Geographic Overlay</div>
+          <p class="apple-bento-body">Every budget stage is audited across: 1. Gender · 2. Disability · 3. Refugee/Displacement · 4. Ethnicity · 5. Religious Minority · 6. Low-Income · 7. Age — plus Geographic Vulnerability (Newly Merged Districts &amp; remote tehsils) as a cross-cutting lens.</p>
+        </article>
+      </section>
+
+      <section class="apple-method-strip">
+        <div class="apple-method-row">
+          <div class="apple-method-item">
+            <div class="apple-method-label">5 Budget Stages (14 Indicators A5–E3)</div>
+            <div class="apple-method-text">1. Policy &amp; Planning → 2. Formulation &amp; Approval → 3. Execution → 4. Monitoring &amp; Evaluation → 5. Outcomes</div>
+          </div>
+          <div class="apple-method-item">
+            <div class="apple-method-label">6-Step Audit Method</div>
+            <div class="apple-method-text">1. Read Surface Text → 2. Apply 7-Dimension Filter → 3. Overlay Geography → 4. Audit Execution → 5. Assign Rating → 6. Rewrite for Equity</div>
+          </div>
+        </div>
+        <div class="apple-traffic-grid">
+          <div class="apple-traffic-pill green"><strong>🟢 YES (Green)</strong><span>Explicit objective + disaggregated data + funded &amp; monitored to outcome.</span></div>
+          <div class="apple-traffic-pill yellow"><strong>🟡 PARTIAL (Yellow)</strong><span>Acknowledged in general terms but lacks disaggregation or outcome tracking.</span></div>
+          <div class="apple-traffic-pill red"><strong>🔴 NO (Red)</strong><span>Absent — no explicit objective, disaggregated data, consultation, or monitoring.</span></div>
+        </div>
+      </section>
+
+      <footer class="apple-cover-footer">
+        <button type="button" class="apple-btn-primary" onclick="enterWorkshopFromCover(true)">Proceed to Workshop Laboratory ➔</button>
+      </footer>
+    </div>
+
     <!-- 1A: PRIMARY INPUT CARD -->
-    <div class="login-card" id="login-card-main">
+    <div class="login-card" id="login-card-main" style="display: none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.1rem; gap:0.5rem; flex-wrap:wrap;">
+        <span class="apple-eyebrow-pill">INTERACTIVE LABORATORY</span>
+        <button type="button" class="apple-back-briefing-btn" onclick="showCoverBriefing()">✦ View Intro Briefing</button>
+      </div>
       <div class="login-brand">📋</div>
       <h1 class="login-title">CPPR EQUITY BUDGETING WORKSHOP</h1>
       <p class="login-subtitle">Participant Digital Laboratory & Interactive Worksheet</p>
@@ -334,7 +416,7 @@
   <div id="toast" class="toast-notice">Notice</div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=20261123-minimal"></script>
+  <script src="app.js?v=20261123-apple"></script>
   <script>
     // Fallback if cached app.js exists
     window.addEventListener('error', function(e) {
