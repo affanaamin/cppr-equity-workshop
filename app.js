@@ -309,12 +309,44 @@ document.addEventListener("DOMContentLoaded", async () => {
       res = await fetch("data.json");
     }
     appData = await res.json();
+
+    // Preload baseline submissions into cache so static deployments & pickers stay in sync
+    try {
+      const bRes = await fetch("baseline_submissions.json");
+      if (bRes.ok) {
+        const baseSubs = await bRes.json();
+        Object.keys(baseSubs).forEach(k => {
+          if (adminSubmissionsCache[k]) {
+            adminSubmissionsCache[k] = { ...adminSubmissionsCache[k], ...baseSubs[k] };
+          }
+        });
+      }
+    } catch (e) {}
+
     checkUrlOrStorageLogin();
   } catch (err) {
     console.error("Failed to load workshop data:", err);
     showToast("Error loading workshop data. Retrying...", true);
   }
 });
+
+function isCardAnswered(a) {
+  if (!a) return false;
+  const hasStatus = Boolean(a.status && a.status.trim());
+  const hasEvidence = Boolean(a.evidence && a.evidence.trim());
+  const hasRationale = Boolean(a.rationale && a.rationale.trim());
+  return hasStatus || hasEvidence || hasRationale;
+}
+
+function ensureParsedPageFields(ans) {
+  if (!ans || !ans.page_ref) return;
+  if (!ans.book_page && !ans.pdf_page) {
+    const docMatch = ans.page_ref.match(/Doc\s*p\.\s*([^/]+)/i);
+    const pdfMatch = ans.page_ref.match(/PDF\s*p\.\s*(.+)/i);
+    if (docMatch) ans.book_page = docMatch[1].trim();
+    if (pdfMatch) ans.pdf_page = pdfMatch[1].trim();
+  }
+}
 
 function sanitizeParticipantKey(name) {
   if (!name) return "";
@@ -339,8 +371,7 @@ function getParticipantProgress(participantName, secKey) {
   const totalCount = 14;
   const answers = data.answers || {};
   for (const cid in answers) {
-    const a = answers[cid];
-    if (a && a.status && a.evidence && a.evidence.trim().length > 0) {
+    if (isCardAnswered(answers[cid])) {
       completedCount++;
     }
   }
@@ -905,7 +936,7 @@ async function fetchServerResponses(secKey) {
 
   // 1. Try local or server API
   try {
-    let url = `/api/submissions/${secKey}`;
+    let url = `api/submissions/${secKey}`;
     if (currentParticipant) {
       url += `?participant=${encodeURIComponent(currentParticipant)}`;
     }
@@ -1008,10 +1039,11 @@ function renderCards(secInfo) {
       rationale: ""
     };
 
-    const isComplete = Boolean(ans.status && ans.evidence.trim());
+    ensureParsedPageFields(ans);
+    const isComplete = isCardAnswered(ans);
 
     const cardDiv = document.createElement("div");
-    cardDiv.className = "indicator-card";
+    cardDiv.className = isComplete ? "indicator-card card-completed" : "indicator-card";
     cardDiv.id = `card-${cid}`;
 
     cardDiv.innerHTML = `
@@ -1237,9 +1269,10 @@ function checkCardCompletion(cid) {
   const ans = currentResponses.answers[cid];
   if (!ans) return;
 
-  const isDone = Boolean(ans.status && ans.evidence && ans.evidence.trim().length > 0);
+  const isDone = isCardAnswered(ans);
   const badgeEl = document.getElementById(`badge-${cid}`);
   const pillEl = document.getElementById(`jump-pill-${cid}`);
+  const cardEl = document.getElementById(`card-${cid}`);
 
   if (badgeEl) {
     badgeEl.textContent = isDone ? "✓ Completed" : "Incomplete";
@@ -1252,6 +1285,10 @@ function checkCardCompletion(cid) {
     else pillEl.classList.remove("completed");
   }
 
+  if (cardEl) {
+    cardEl.classList.toggle("card-completed", isDone);
+  }
+
   updateProgress();
 }
 
@@ -1262,9 +1299,12 @@ function updateProgress() {
 
   cards.forEach(c => {
     const a = currentResponses.answers[c.id];
-    if (a && a.status && a.evidence && a.evidence.trim().length > 0) {
-      doneCount++;
-    }
+    const done = isCardAnswered(a);
+    if (done) doneCount++;
+    const pillEl = document.getElementById(`jump-pill-${c.id}`);
+    if (pillEl) pillEl.classList.toggle("completed", done);
+    const cardEl = document.getElementById(`card-${c.id}`);
+    if (cardEl) cardEl.classList.toggle("card-completed", done);
   });
 
   const pct = Math.round((doneCount / cards.length) * 100);
@@ -1324,7 +1364,7 @@ async function submitResponses(isExplicitSubmit) {
   localStorage.setItem(storageKey, JSON.stringify(currentResponses));
   recordParticipant(currentParticipant, currentSector);
 
-  const answeredCount = Object.keys(currentResponses.answers || {}).length;
+  const answeredCount = Object.values(currentResponses.answers || {}).filter(isCardAnswered).length;
 
   // 2. Real-time Cloud Push to ntfy.sh so facilitator receives instant alerts anywhere
   try {
@@ -1858,12 +1898,13 @@ async function refreshAdminData() {
                   answers: parsed.answers || {}
                 };
               } else {
-                newCache[sec].table_number = parsed.table_number;
-                newCache[sec].completed_count = parsed.completed_count || 0;
+                newCache[sec].table_number = parsed.table_number || newCache[sec].table_number;
+                newCache[sec].answers = { ...(newCache[sec].answers || {}), ...(parsed.answers || {}) };
+                const mergedCount = Object.values(newCache[sec].answers).filter(isCardAnswered).length;
+                newCache[sec].completed_count = mergedCount;
                 newCache[sec].total_count = 14;
-                newCache[sec].completion_pct = Math.round(((parsed.completed_count || 0) / 14) * 100);
-                newCache[sec].last_saved = parsed.last_saved;
-                newCache[sec].answers = parsed.answers || {};
+                newCache[sec].completion_pct = Math.round((mergedCount / 14) * 100);
+                newCache[sec].last_saved = parsed.last_saved || newCache[sec].last_saved;
               }
             }
           }
@@ -1887,8 +1928,7 @@ async function refreshAdminData() {
             if (!newCache[sec].participants[pName]) {
               let count = 0;
               for (const cid in (val.answers || {})) {
-                const a = val.answers[cid];
-                if (a && a.status && a.evidence && a.evidence.trim().length > 0) count++;
+                if (isCardAnswered(val.answers[cid])) count++;
               }
               newCache[sec].participants[pName] = {
                 participant_name: pName,
@@ -2187,8 +2227,7 @@ function openInspectorModal(secKey, encodedPartName) {
   // Calculate completion count
   let completedCount = 0;
   for (const cid in targetAnswers) {
-    const a = targetAnswers[cid];
-    if (a && a.status && a.evidence && a.evidence.trim().length > 0) {
+    if (isCardAnswered(targetAnswers[cid])) {
       completedCount++;
     }
   }
@@ -2264,7 +2303,7 @@ function renderInspectorCards(filterMode) {
 
   cards.forEach(card => {
     const a = answers[card.id];
-    const isDone = Boolean(a && a.status && a.evidence && a.evidence.trim().length > 0);
+    const isDone = isCardAnswered(a);
     if (isDone) doneTotal++;
     else todoTotal++;
   });
@@ -2276,7 +2315,7 @@ function renderInspectorCards(filterMode) {
 
   cards.forEach(card => {
     const a = answers[card.id];
-    const isDone = Boolean(a && a.status && a.evidence && a.evidence.trim().length > 0);
+    const isDone = isCardAnswered(a);
 
     if (filterMode === "done" && !isDone) return;
     if (filterMode === "todo" && isDone) return;
