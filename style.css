@@ -56,8 +56,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem 1.25rem;
+  justify-content: flex-start;
+  padding: 0.75rem 1.25rem 2.5rem;
   background: radial-gradient(circle at 50% 0%, #eef4ff 0%, #f5f5f7 60%);
 }
 
@@ -1624,7 +1624,8 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
+  transform: none !important;
 }
 
 .apple-cover-nav {
@@ -1786,9 +1787,10 @@ body {
 }
 
 .apple-bento-grid {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.15rem;
+  gap: 0.85rem;
 }
 
 @media (max-width: 720px) {
@@ -1802,46 +1804,46 @@ body {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 1.15rem;
-  padding: 1.15rem 1.3rem;
+  padding: 0.95rem 1.15rem;
   text-align: left;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring);
+  transition: box-shadow 0.25s var(--ease-spring), border-color 0.25s ease;
 }
 
 .apple-bento-card:hover {
-  transform: translateY(-3px);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.07);
+  border-color: rgba(0, 113, 227, 0.2);
 }
 
 .apple-bento-tag {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .apple-bento-stat {
-  font-size: clamp(1.65rem, 2.8vw, 2.2rem);
+  font-size: clamp(1.45rem, 2.4vw, 1.95rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
   color: var(--primary-navy);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
 
 .apple-bento-stat-label {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--accent-blue);
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.4rem;
 }
 
 .apple-bento-body {
-  font-size: 0.82rem;
+  font-size: 0.79rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.44;
 }
 
 .apple-method-strip {
@@ -1905,11 +1907,11 @@ body {
 
 .apple-traffic-pill {
   border-radius: 0.85rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.65rem 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.78rem;
+  gap: 0.15rem;
+  font-size: 0.76rem;
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -1990,7 +1992,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5.25rem 1.25rem 2rem;
+  padding: 4.1rem 1rem 1rem;
   max-width: 1040px;
   margin: 0 auto;
   opacity: 0;
@@ -2133,40 +2135,40 @@ body {
 .apple-stage-header {
   text-align: center;
   max-width: 720px;
-  margin: 0 auto 1.35rem;
+  margin: 0 auto 0.9rem;
 }
 
 .apple-stage-eyebrow {
   display: inline-block;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-blue);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
 }
 
 .apple-stage-title {
-  font-size: clamp(1.65rem, 3.4vw, 2.5rem);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.12;
   color: var(--primary-navy);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.35rem;
 }
 
 .apple-stage-sub {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .apple-dims-showcase {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.15rem;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
 }
 
 @media (max-width: 900px) {
@@ -2184,11 +2186,11 @@ body {
 .apple-dim-card {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: 1rem;
-  padding: 0.85rem 0.95rem;
+  border-radius: 0.95rem;
+  padding: 0.7rem 0.85rem;
   display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
+  gap: 0.6rem;
   text-align: left;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
 }
@@ -2259,8 +2261,8 @@ body {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.85rem;
+  margin-bottom: 0.8rem;
 }
 
 @media (max-width: 760px) {
@@ -2272,13 +2274,13 @@ body {
 .apple-transform-card {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 1.15rem;
-  padding: 1.15rem 1.3rem;
+  border-radius: 1.1rem;
+  padding: 0.95rem 1.15rem;
   text-align: left;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
 
 .apple-transform-card.is-red {
@@ -2300,23 +2302,24 @@ body {
 }
 
 .apple-transform-quote {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--primary-navy);
   background: rgba(0, 0, 0, 0.03);
-  border-radius: 0.8rem;
-  padding: 0.75rem 0.95rem;
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.85rem;
 }
 
 .apple-transform-diag {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  line-height: 1.48;
+  line-height: 1.44;
 }
 
 .apple-launchpad-stage {
   width: 100%;
+  min-height: calc(100vh - 2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2328,7 +2331,7 @@ body {
 .apple-launchpad-header {
   text-align: center;
   max-width: 680px;
-  margin: 0 auto 1.35rem;
+  margin: 0 auto 1.15rem;
 }
 
 #login-card-main {

@@ -577,12 +577,13 @@ function quickSelectSector(secCode) {
 
 let appleCinemaRafPending = false;
 let appleCinemaListenersBound = false;
+let coverDismissedInMemory = false;
 
 const APPLE_SCENE_WINDOWS = [
-  { enterStart: -1, enterEnd: -1, exitStart: 0.10, exitEnd: 0.26, holdP: 0.00 },
-  { enterStart: 0.18, enterEnd: 0.32, exitStart: 0.46, exitEnd: 0.58, holdP: 0.38 },
-  { enterStart: 0.50, enterEnd: 0.62, exitStart: 0.74, exitEnd: 0.85, holdP: 0.68 },
-  { enterStart: 0.78, enterEnd: 0.89, exitStart: 0.96, exitEnd: 1.00, holdP: 0.92 }
+  { enterStart: -1, enterEnd: -1, exitStart: 0.14, exitEnd: 0.22, holdP: 0.00 },
+  { enterStart: 0.22, enterEnd: 0.31, exitStart: 0.44, exitEnd: 0.52, holdP: 0.37 },
+  { enterStart: 0.52, enterEnd: 0.61, exitStart: 0.74, exitEnd: 0.82, holdP: 0.67 },
+  { enterStart: 0.82, enterEnd: 0.90, exitStart: 0.96, exitEnd: 1.00, holdP: 0.93 }
 ];
 
 function animateCountUp(statEl) {
@@ -640,6 +641,11 @@ function updateAppleCinemaScroll() {
       mainCard.style.transform = "";
       mainCard.style.filter = "";
     }
+    if (launchIntro) {
+      launchIntro.style.opacity = "";
+      launchIntro.style.transform = "";
+      launchIntro.style.filter = "";
+    }
     return;
   }
 
@@ -667,6 +673,10 @@ function updateAppleCinemaScroll() {
       scene.style.transform = "none";
       scene.style.filter = "none";
       scene.style.pointerEvents = "auto";
+      scene.querySelectorAll(".apple-scene-child").forEach(child => {
+        child.style.opacity = "1";
+        child.style.transform = "none";
+      });
       return;
     }
 
@@ -675,28 +685,28 @@ function updateAppleCinemaScroll() {
     let translateY = 0;
     let blur = 0;
 
-    if (win.enterStart >= 0 && p < win.enterStart) {
+    if (win.enterStart >= 0 && p <= win.enterStart) {
       alpha = 0;
-      scale = 0.86;
-      translateY = 56;
-      blur = 12;
+      scale = 0.88;
+      translateY = 48;
+      blur = 10;
     } else if (win.enterStart >= 0 && p < win.enterEnd) {
       const t = easeOutCubic(clamp01((p - win.enterStart) / Math.max(win.enterEnd - win.enterStart, 0.001)));
       alpha = t;
-      scale = 0.86 + 0.14 * t;
-      translateY = 56 * (1 - t);
-      blur = 12 * (1 - t);
-    } else if (p > win.exitEnd) {
+      scale = 0.88 + 0.12 * t;
+      translateY = 48 * (1 - t);
+      blur = 10 * (1 - t);
+    } else if (p >= win.exitEnd) {
       alpha = 0;
-      scale = 1.14;
-      translateY = -56;
-      blur = 12;
+      scale = 1.12;
+      translateY = -48;
+      blur = 10;
     } else if (p > win.exitStart) {
       const t = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
       alpha = 1 - t;
-      scale = 1 + 0.14 * t;
-      translateY = -56 * t;
-      blur = 12 * t;
+      scale = 1 + 0.12 * t;
+      translateY = -48 * t;
+      blur = 10 * t;
     }
 
     scene.style.opacity = alpha.toFixed(3);
@@ -710,17 +720,29 @@ function updateAppleCinemaScroll() {
       activeDotIdx = idx;
     }
 
-    // Stagger individual cards cleanly inside each entering/exiting scene
+    // Stagger individual cards continuously across enter, hold, and exit phases
     const children = scene.querySelectorAll(".apple-scene-child");
     children.forEach((child, cIdx) => {
-      const staggerShift = (cIdx % 5) * 0.018;
-      if (win.enterStart >= 0 && p < win.enterEnd + staggerShift) {
-        const ct = easeOutCubic(clamp01((p - (win.enterStart + staggerShift * 0.7)) / Math.max(win.enterEnd - win.enterStart, 0.001)));
+      const staggerShift = (cIdx % 5) * 0.007;
+      if (win.enterStart >= 0 && p <= win.enterStart) {
+        child.style.opacity = "0";
+        child.style.transform = "translate3d(0, 22px, 0) scale(0.95)";
+      } else if (win.enterStart >= 0 && p < win.enterEnd + staggerShift) {
+        const startOffset = win.enterStart + staggerShift * 0.5;
+        const span = Math.max((win.enterEnd + staggerShift) - startOffset, 0.001);
+        const ct = easeOutCubic(clamp01((p - startOffset) / span));
         child.style.opacity = ct.toFixed(3);
         child.style.transform = `translate3d(0, ${(22 * (1 - ct)).toFixed(1)}px, 0) scale(${(0.95 + 0.05 * ct).toFixed(4)})`;
+      } else if (p >= win.exitEnd) {
+        child.style.opacity = "0";
+        child.style.transform = "translate3d(0, -18px, 0) scale(0.98)";
+      } else if (p > win.exitStart) {
+        const ct = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
+        child.style.opacity = (1 - ct).toFixed(3);
+        child.style.transform = `translate3d(0, ${(-18 * ct).toFixed(1)}px, 0) scale(${(1 - 0.02 * ct).toFixed(4)})`;
       } else {
-        child.style.opacity = "";
-        child.style.transform = "";
+        child.style.opacity = "1";
+        child.style.transform = "translate3d(0, 0px, 0) scale(1)";
       }
     });
 
@@ -744,12 +766,12 @@ function updateAppleCinemaScroll() {
   // Bidirectional entrance/exit on the bottom Workshop Launchpad
   if (launchStage && mainCard && !reducedMotion) {
     const lRect = launchStage.getBoundingClientRect();
-    const enterRatio = clamp01((window.innerHeight - lRect.top) / Math.max(window.innerHeight * 0.55, 1));
+    const enterRatio = clamp01((window.innerHeight - lRect.top) / Math.max(window.innerHeight * 0.45, 1));
     const lt = easeOutCubic(enterRatio);
-    const lAlpha = lt;
-    const lScale = 0.9 + 0.1 * lt;
-    const lY = 40 * (1 - lt);
-    const lBlur = 10 * (1 - lt);
+    const lAlpha = 0.15 + 0.85 * lt;
+    const lScale = 0.94 + 0.06 * lt;
+    const lY = 32 * (1 - lt);
+    const lBlur = 6 * (1 - lt);
     const applyLaunchStyle = (el) => {
       el.style.opacity = lAlpha.toFixed(3);
       el.style.transform = `translate3d(0, ${lY.toFixed(1)}px, 0) scale(${lScale.toFixed(4)})`;
@@ -777,8 +799,8 @@ function scheduleAppleCinemaUpdate() {
 
 function initAppleScrollExperience() {
   updateAppleCinemaScroll();
-  if (!appleScrollListenersBound) {
-    appleScrollListenersBound = true;
+  if (!appleCinemaListenersBound) {
+    appleCinemaListenersBound = true;
     window.addEventListener("scroll", scheduleAppleCinemaUpdate, { passive: true });
     window.addEventListener("resize", scheduleAppleCinemaUpdate, { passive: true });
   }
@@ -808,13 +830,14 @@ function enterWorkshopFromCover(focusInput = true) {
   const launchIntro = document.getElementById("apple-launchpad-intro");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
-  sessionStorage.setItem("cppr_cover_dismissed", "1");
+  coverDismissedInMemory = true;
+  sessionStorage.removeItem("cppr_cover_dismissed");
   if (partCard) partCard.style.display = "none";
 
   const finalizeReveal = () => {
     if (cover) {
       cover.style.display = "none";
-      cover.classList.remove("cover-exit");
+      cover.classList.remove("cover-exit", "apple-reveal");
     }
     if (launchIntro) {
       launchIntro.style.display = "none";
@@ -849,11 +872,12 @@ function showCoverBriefing() {
   const launchIntro = document.getElementById("apple-launchpad-intro");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
+  coverDismissedInMemory = false;
   sessionStorage.removeItem("cppr_cover_dismissed");
   if (partCard) partCard.style.display = "none";
   if (cover) {
     cover.style.display = "flex";
-    cover.classList.add("apple-reveal");
+    cover.classList.remove("apple-reveal", "cover-exit");
   }
   if (launchIntro) launchIntro.style.display = "block";
   if (mainCard) mainCard.style.display = "block";
@@ -865,7 +889,8 @@ function showParticipantPicker(participantName) {
   if (!participantName || !participantName.trim()) return;
   currentParticipant = participantName.trim();
   sessionStorage.setItem("cppr_participant_name", currentParticipant);
-  sessionStorage.setItem("cppr_cover_dismissed", "1");
+  coverDismissedInMemory = true;
+  sessionStorage.removeItem("cppr_cover_dismissed");
   recordParticipant(currentParticipant);
 
   const loginView = document.getElementById("login-view");
@@ -1033,7 +1058,8 @@ function showLoginView() {
   const launchIntro = document.getElementById("apple-launchpad-intro");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
-  const coverDismissed = sessionStorage.getItem("cppr_cover_dismissed") === "1";
+  sessionStorage.removeItem("cppr_cover_dismissed");
+  const coverDismissed = coverDismissedInMemory;
 
   if (cover && mainCard) {
     if (coverDismissed) {
@@ -1046,6 +1072,7 @@ function showLoginView() {
       mainCard.classList.add("apple-reveal");
     } else {
       cover.style.display = "flex";
+      cover.classList.remove("apple-reveal", "cover-exit");
       if (launchIntro) launchIntro.style.display = "block";
       mainCard.style.display = "block";
     }
