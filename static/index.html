@@ -10,89 +10,180 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261123-apple">
+  <link rel="stylesheet" href="style.css?v=20261123-scrolly">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 </head>
 <body>
 
-  <!-- VIEW 1: APPLE / ASQSCHOLAR COVER & LOGIN SCREEN -->
+  <!-- VIEW 1: APPLE / ASQSCHOLAR SCROLLYTELLING COVER & LOGIN SCREEN -->
   <div id="login-view" class="login-wrapper">
-    <!-- 1.0: INTRO COVER BRIEFING -->
-    <div id="apple-cover-screen" class="apple-cover-container apple-reveal">
+    <!-- 1.0: APPLE PRODUCT-STYLE SCROLL BRIEFING -->
+    <div id="apple-cover-screen" class="apple-cover-container">
       <nav class="apple-cover-nav">
-        <div class="apple-partner-group">
-          <span class="apple-partner-pill"><strong>CPPR</strong> · IMSciences Peshawar</span>
-          <span class="apple-partner-pill">German Cooperation · GIZ</span>
-          <span class="apple-partner-pill">KPESED · Govt of KP</span>
+        <div class="apple-cover-nav-inner">
+          <div class="apple-partner-group">
+            <span class="apple-partner-pill"><strong>CPPR</strong> · IMSciences Peshawar</span>
+            <span class="apple-partner-pill">German Cooperation · GIZ</span>
+            <span class="apple-partner-pill">KPESED · Govt of KP</span>
+          </div>
+          <button type="button" class="apple-nav-cta" onclick="enterWorkshopFromCover(true)">Skip to Workshop ➔</button>
         </div>
-        <button type="button" class="apple-nav-cta" onclick="enterWorkshopFromCover(true)">Enter Workshop ➔</button>
+        <div class="apple-scroll-track">
+          <div id="apple-scroll-bar" class="apple-scroll-fill"></div>
+        </div>
       </nav>
 
-      <header class="apple-hero">
-        <span class="apple-eyebrow-pill">EQUITY BUDGETING TOOL (EBT) · KHYBER PAKHTUNKHWA</span>
-        <h1 class="apple-hero-title">“Who does the budget actually reach?”</h1>
-        <p class="apple-hero-subtitle">Promoting Equity Budgeting in Public Service Delivery — ensuring government budgets are planned, allocated, executed, and monitored to reduce inequalities and reach marginalized groups.</p>
-        <div class="apple-hero-actions">
-          <button type="button" class="apple-btn-primary" onclick="enterWorkshopFromCover(true)">Launch Interactive Workshop ➔</button>
-          <a href="#apple-bento-facts" class="apple-btn-secondary">Key Findings &amp; Framework ↓</a>
+      <!-- CHAPTER 1: KEYNOTE HERO STAGE -->
+      <section class="apple-scroll-stage hero-stage">
+        <div class="apple-hero" id="apple-hero-box">
+          <span class="apple-eyebrow-pill">EQUITY BUDGETING TOOL (EBT) · KHYBER PAKHTUNKHWA</span>
+          <h1 class="apple-hero-title apple-gradient-text">“Who does the budget actually reach?”</h1>
+          <p class="apple-hero-subtitle">Promoting Equity Budgeting in Public Service Delivery — ensuring government budgets are planned, allocated, executed, and monitored to reduce inequalities and reach marginalized groups.</p>
+          <div class="apple-hero-actions">
+            <a href="#chapter-reality" class="apple-btn-primary">Scroll the Story ↓</a>
+            <button type="button" class="apple-btn-secondary" onclick="enterWorkshopFromCover(true)">Jump Straight to Workshop ➔</button>
+          </div>
+          <a href="#chapter-reality" class="apple-scroll-indicator" aria-label="Scroll down to explore">
+            <span>Scroll to explore</span>
+            <div class="apple-scroll-mouse"><div class="apple-scroll-wheel"></div></div>
+          </a>
         </div>
-      </header>
-
-      <section id="apple-bento-facts" class="apple-bento-grid">
-        <article class="apple-bento-card" style="animation-delay: 0.05s;">
-          <div class="apple-bento-tag">KP EDUCATION DIVIDE · FY 2025–26</div>
-          <div class="apple-bento-stat">4.9M</div>
-          <div class="apple-bento-stat-label">Out-of-School Children Ages 5–16</div>
-          <p class="apple-bento-body">59% of out-of-school children are girls and 53% of dropouts are female. Out of KP's Rs. 363B education budget (17% of Rs. 2,119B total), most goes to recurring salaries — leaving only Rs. 5B for literacy and dropout reduction.</p>
-        </article>
-
-        <article class="apple-bento-card" style="animation-delay: 0.1s;">
-          <div class="apple-bento-tag">PHASE I EBT FINDING · REALITY CHECK</div>
-          <div class="apple-bento-stat">0 Green</div>
-          <div class="apple-bento-stat-label">Indicators Across the Budget Cycle</div>
-          <p class="apple-bento-body">Approved does not mean delivered. In Phase I, the Disability Rehabilitation Fund remained unspent and textbook delivery fell to 25–30%. Both lines passed planning and approval; neither passed an equity check.</p>
-        </article>
-
-        <article class="apple-bento-card" style="animation-delay: 0.15s;">
-          <div class="apple-bento-tag">LOCAL GOVERNANCE · ARTICLES 25, 25A &amp; 34–38</div>
-          <div class="apple-bento-stat">Rs. 52.8B</div>
-          <div class="apple-bento-stat-label">2026–27 Local Gov Development ADP</div>
-          <p class="apple-bento-body">Up from Rs. 12.0B (2005–15) and Rs. 291.5B (2019–26). Under the KP Local Government Act 2013 (Sections 25, 34 &amp; 36), councils must disaggregate KPIs, publish bi-annual execution reports (31 Dec &amp; 31 Jul), and hold public audit hearings.</p>
-        </article>
-
-        <article class="apple-bento-card" style="animation-delay: 0.2s;">
-          <div class="apple-bento-tag">BEYOND GENDER ALONE · INTERSECTIONAL LENS</div>
-          <div class="apple-bento-stat">7 + 1</div>
-          <div class="apple-bento-stat-label">Core Dimensions + Geographic Overlay</div>
-          <p class="apple-bento-body">Every budget stage is audited across: 1. Gender · 2. Disability · 3. Refugee/Displacement · 4. Ethnicity · 5. Religious Minority · 6. Low-Income · 7. Age — plus Geographic Vulnerability (Newly Merged Districts &amp; remote tehsils) as a cross-cutting lens.</p>
-        </article>
       </section>
 
-      <section class="apple-method-strip">
-        <div class="apple-method-row">
-          <div class="apple-method-item">
-            <div class="apple-method-label">5 Budget Stages (14 Indicators A5–E3)</div>
-            <div class="apple-method-text">1. Policy &amp; Planning → 2. Formulation &amp; Approval → 3. Execution → 4. Monitoring &amp; Evaluation → 5. Outcomes</div>
+      <!-- CHAPTER 2: THE EMPIRICAL REALITY -->
+      <section id="chapter-reality" class="apple-scroll-stage">
+        <div class="apple-stage-header scroll-reveal">
+          <span class="apple-stage-eyebrow">01 · THE EMPIRICAL REALITY</span>
+          <h2 class="apple-stage-title">Approved. Budgeted. Yet unequal.</h2>
+          <p class="apple-stage-sub">Why an equity audit across the full budget cycle matters in Khyber Pakhtunkhwa.</p>
+        </div>
+
+        <div class="apple-bento-grid">
+          <article class="apple-bento-card scroll-reveal" data-delay="1">
+            <div class="apple-bento-tag">KP EDUCATION DIVIDE · FY 2025–26</div>
+            <div class="apple-bento-stat" data-count-target="4.9" data-count-decimals="1" data-count-suffix="M">4.9M</div>
+            <div class="apple-bento-stat-label">Out-of-School Children Ages 5–16</div>
+            <p class="apple-bento-body">59% of out-of-school children are girls and 53% of dropouts are female. Out of KP's Rs. 363B education budget (17% of Rs. 2,119B total), most goes to recurring salaries — leaving only Rs. 5B for literacy and dropout reduction.</p>
+          </article>
+
+          <article class="apple-bento-card scroll-reveal" data-delay="2">
+            <div class="apple-bento-tag">PHASE I EBT FINDING · REALITY CHECK</div>
+            <div class="apple-bento-stat" data-count-target="0" data-count-decimals="0" data-count-suffix=" Green">0 Green</div>
+            <div class="apple-bento-stat-label">Indicators Across the Budget Cycle</div>
+            <p class="apple-bento-body">Approved does not mean delivered. In Phase I, the Disability Rehabilitation Fund remained unspent and textbook delivery fell to 25–30%. Both lines passed planning and approval; neither passed an equity check.</p>
+          </article>
+
+          <article class="apple-bento-card scroll-reveal" data-delay="3">
+            <div class="apple-bento-tag">LOCAL GOVERNANCE · ARTICLES 25, 25A &amp; 34–38</div>
+            <div class="apple-bento-stat" data-count-target="52.8" data-count-decimals="1" data-count-prefix="Rs. " data-count-suffix="B">Rs. 52.8B</div>
+            <div class="apple-bento-stat-label">2026–27 Local Gov Development ADP</div>
+            <p class="apple-bento-body">Up from Rs. 12.0B (2005–15) and Rs. 291.5B (2019–26). Under the KP Local Government Act 2013 (Sections 25, 34 &amp; 36), councils must disaggregate KPIs, publish bi-annual execution reports (31 Dec &amp; 31 Jul), and hold public audit hearings.</p>
+          </article>
+
+          <article class="apple-bento-card scroll-reveal" data-delay="4">
+            <div class="apple-bento-tag">BEYOND GENDER ALONE · INTERSECTIONAL LENS</div>
+            <div class="apple-bento-stat">7 + 1</div>
+            <div class="apple-bento-stat-label">Core Dimensions + Geographic Overlay</div>
+            <p class="apple-bento-body">Every budget stage is audited across: 1. Gender · 2. Disability · 3. Refugee/Displacement · 4. Ethnicity · 5. Religious Minority · 6. Low-Income · 7. Age — plus Geographic Vulnerability (Newly Merged Districts &amp; remote tehsils) as a cross-cutting lens.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- CHAPTER 3: THE 7+1 DIMENSIONS & 5-STAGE CYCLE -->
+      <section id="chapter-architecture" class="apple-scroll-stage">
+        <div class="apple-stage-header scroll-reveal">
+          <span class="apple-stage-eyebrow">02 · THE ANALYTICAL ARCHITECTURE</span>
+          <h2 class="apple-stage-title">Seven dimensions. Five stages. One lens.</h2>
+          <p class="apple-stage-sub">Don't default to thinking “equity” means gender alone — most real budget documents touch several dimensions together.</p>
+        </div>
+
+        <div class="apple-dims-showcase">
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 1;">
+            <span class="apple-dim-icon">♀️</span>
+            <div><strong>1. Gender</strong><span>Sex-disaggregated targets &amp; data</span></div>
           </div>
-          <div class="apple-method-item">
-            <div class="apple-method-label">6-Step Audit Method</div>
-            <div class="apple-method-text">1. Read Surface Text → 2. Apply 7-Dimension Filter → 3. Overlay Geography → 4. Audit Execution → 5. Assign Rating → 6. Rewrite for Equity</div>
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 2;">
+            <span class="apple-dim-icon">♿</span>
+            <div><strong>2. Disability</strong><span>Accessibility &amp; DPO consultation</span></div>
+          </div>
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 3;">
+            <span class="apple-dim-icon">⛺</span>
+            <div><strong>3. Refugee / Displacement</strong><span>Afghan refugee &amp; IDP inclusion</span></div>
+          </div>
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 4;">
+            <span class="apple-dim-icon">🗣️</span>
+            <div><strong>4. Ethnicity</strong><span>Group-level data &amp; targets</span></div>
+          </div>
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 5;">
+            <span class="apple-dim-icon">🕊️</span>
+            <div><strong>5. Religious Minority</strong><span>Explicit non-Muslim provisions</span></div>
+          </div>
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 6;">
+            <span class="apple-dim-icon">📉</span>
+            <div><strong>6. Low-Income</strong><span>Targeted household allocations</span></div>
+          </div>
+          <div class="apple-dim-card scroll-reveal" style="--stagger-idx: 7;">
+            <span class="apple-dim-icon">👶</span>
+            <div><strong>7. Age</strong><span>Children, youth &amp; elderly care</span></div>
+          </div>
+          <div class="apple-dim-card is-cross-cutting scroll-reveal" style="--stagger-idx: 8;">
+            <span class="apple-dim-icon">🗺️</span>
+            <div><strong>+ Geographic Vulnerability</strong><span>Cross-cutting: Bajaur, Orakzai &amp; remote tehsils</span></div>
           </div>
         </div>
-        <div class="apple-traffic-grid">
+
+        <div class="apple-cycle-strip scroll-reveal" data-delay="2">
+          <div class="apple-cycle-step"><span>01</span>Policy &amp; Planning</div>
+          <div class="apple-cycle-arrow">→</div>
+          <div class="apple-cycle-step"><span>02</span>Formulation &amp; Approval</div>
+          <div class="apple-cycle-arrow">→</div>
+          <div class="apple-cycle-step"><span>03</span>Budget Execution</div>
+          <div class="apple-cycle-arrow">→</div>
+          <div class="apple-cycle-step"><span>04</span>Monitoring &amp; Evaluation</div>
+          <div class="apple-cycle-arrow">→</div>
+          <div class="apple-cycle-step"><span>05</span>Budget Outcomes</div>
+        </div>
+      </section>
+
+      <!-- CHAPTER 4: LIVE CASE STUDY (RED-TO-GREEN) -->
+      <section id="chapter-case-study" class="apple-scroll-stage">
+        <div class="apple-stage-header scroll-reveal">
+          <span class="apple-stage-eyebrow">03 · THE 6-STEP METHOD IN ACTION</span>
+          <h2 class="apple-stage-title">From blind allocation to genuine equity.</h2>
+          <p class="apple-stage-sub">Illustrative Audit · Budget Line Item 402 across the 6-Step Equity Method.</p>
+        </div>
+
+        <div class="apple-transform-grid">
+          <div class="apple-transform-card is-red scroll-reveal" data-delay="1">
+            <span class="apple-transform-badge">🔴 INITIAL LINE ITEM 402 · RED RATING</span>
+            <blockquote class="apple-transform-quote">“Construction of 5 new community halls in underserved village and neighbourhood councils.”</blockquote>
+            <p class="apple-transform-diag"><strong>Audit Finding:</strong> ✓ Geographic Vulnerability present (underserved councils). ✕ Silent on all 7 demographic dimensions (Gender, Disability, Refugee, Ethnicity, Religion, Low-Income, Age). Physical building is funded, but equitable access is ignored.</p>
+          </div>
+
+          <div class="apple-transform-card is-green scroll-reveal" data-delay="2">
+            <span class="apple-transform-badge">🟢 6-STEP EQUITY REWRITE · GREEN RATING</span>
+            <blockquote class="apple-transform-quote">“Construction of 5 fully accessible community halls in underserved village and neighbourhood councils, with ramps and accessible toilets, women’s use times, open access for all ethnic and religious communities and displaced households, subsidised use for low-income households, and facilities for all ages.”</blockquote>
+            <p class="apple-transform-diag"><strong>Equity Standard:</strong> ✓ Explicit inclusion across all 7 dimensions + geographic targeting + measurable delivery standards.</p>
+          </div>
+        </div>
+
+        <div class="apple-traffic-grid scroll-reveal" data-delay="3">
           <div class="apple-traffic-pill green"><strong>🟢 YES (Green)</strong><span>Explicit objective + disaggregated data + funded &amp; monitored to outcome.</span></div>
           <div class="apple-traffic-pill yellow"><strong>🟡 PARTIAL (Yellow)</strong><span>Acknowledged in general terms but lacks disaggregation or outcome tracking.</span></div>
           <div class="apple-traffic-pill red"><strong>🔴 NO (Red)</strong><span>Absent — no explicit objective, disaggregated data, consultation, or monitoring.</span></div>
         </div>
       </section>
 
-      <footer class="apple-cover-footer">
-        <button type="button" class="apple-btn-primary" onclick="enterWorkshopFromCover(true)">Proceed to Workshop Laboratory ➔</button>
-      </footer>
+      <!-- CHAPTER 5 INTRO HEADER LEADING INTO WORKSHOP CARD -->
+      <section class="apple-launchpad-header scroll-reveal">
+        <span class="apple-stage-eyebrow">04 · YOUR TURN</span>
+        <h2 class="apple-stage-title">Ready to audit your department's budget?</h2>
+        <p class="apple-stage-sub">Enter your individual name below to unlock all four sector worksheets and save your work.</p>
+      </section>
     </div>
 
-    <!-- 1A: PRIMARY INPUT CARD -->
-    <div class="login-card" id="login-card-main" style="display: none;">
+    <!-- 1A: PRIMARY INPUT CARD (CHAPTER 5 LAUNCHPAD) -->
+    <div class="login-card scroll-reveal" id="login-card-main">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.1rem; gap:0.5rem; flex-wrap:wrap;">
         <span class="apple-eyebrow-pill">INTERACTIVE LABORATORY</span>
         <button type="button" class="apple-back-briefing-btn" onclick="showCoverBriefing()">✦ View Intro Briefing</button>
@@ -416,7 +507,7 @@
   <div id="toast" class="toast-notice">Notice</div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=20261123-apple"></script>
+  <script src="app.js?v=20261123-scrolly"></script>
   <script>
     // Fallback if cached app.js exists
     window.addEventListener('error', function(e) {

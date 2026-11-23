@@ -329,6 +329,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e) {}
 
     checkUrlOrStorageLogin();
+    initAppleScrollExperience();
   } catch (err) {
     console.error("Failed to load workshop data:", err);
     showToast("Error loading workshop data. Retrying...", true);
@@ -574,20 +575,106 @@ function quickSelectSector(secCode) {
   openSector(secCode);
 }
 
+let appleScrollObserver = null;
+let appleScrollListenersBound = false;
+
+function animateCountUp(statEl) {
+  if (!statEl || statEl.dataset.counted === "1") return;
+  const target = parseFloat(statEl.dataset.countTarget);
+  if (isNaN(target)) return;
+  statEl.dataset.counted = "1";
+
+  const decimals = parseInt(statEl.dataset.countDecimals || "0", 10);
+  const prefix = statEl.dataset.countPrefix || "";
+  const suffix = statEl.dataset.countSuffix || "";
+  const duration = 1100;
+  const startTime = performance.now();
+
+  if (target === 0) {
+    statEl.textContent = `${prefix}0${suffix}`;
+    return;
+  }
+
+  function step(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = (target * eased).toFixed(decimals);
+    statEl.textContent = `${prefix}${val}${suffix}`;
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      statEl.textContent = `${prefix}${target.toFixed(decimals)}${suffix}`;
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function initAppleScrollExperience() {
+  const revealEls = document.querySelectorAll(".scroll-reveal");
+  if (!revealEls.length) return;
+
+  const markVisible = (el) => {
+    el.classList.add("is-visible");
+    el.querySelectorAll("[data-count-target]").forEach(animateCountUp);
+  };
+
+  if ("IntersectionObserver" in window) {
+    if (appleScrollObserver) appleScrollObserver.disconnect();
+    appleScrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          markVisible(entry.target);
+          appleScrollObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14, rootMargin: "0px 0px -40px 0px" });
+
+    revealEls.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.94 && rect.bottom > 0) {
+        markVisible(el);
+      } else {
+        appleScrollObserver.observe(el);
+      }
+    });
+  } else {
+    revealEls.forEach(markVisible);
+  }
+
+  if (!appleScrollListenersBound) {
+    appleScrollListenersBound = true;
+    window.addEventListener("scroll", () => {
+      const cover = document.getElementById("apple-cover-screen");
+      if (!cover || cover.style.display === "none") return;
+
+      const scrollBar = document.getElementById("apple-scroll-bar");
+      const docHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      const pct = Math.min(100, Math.max(0, (window.scrollY / docHeight) * 100));
+      if (scrollBar) scrollBar.style.width = `${pct}%`;
+
+      const heroBox = document.getElementById("apple-hero-box");
+      if (heroBox) {
+        const heroProgress = Math.min(1, Math.max(0, window.scrollY / Math.max(window.innerHeight * 0.75, 1)));
+        heroBox.style.setProperty("--hero-scroll", heroProgress.toFixed(3));
+      }
+    }, { passive: true });
+  }
+}
+
 function enterWorkshopFromCover(focusInput = true) {
   const cover = document.getElementById("apple-cover-screen");
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
   sessionStorage.setItem("cppr_cover_dismissed", "1");
   if (partCard) partCard.style.display = "none";
-  if (cover) {
+  if (cover && cover.style.display !== "none") {
     cover.classList.add("cover-exit");
     setTimeout(() => {
       cover.style.display = "none";
       cover.classList.remove("cover-exit");
       if (mainCard) {
         mainCard.style.display = "block";
-        mainCard.classList.add("apple-reveal");
+        mainCard.classList.add("is-visible", "apple-reveal");
       }
       if (focusInput) {
         const inp = document.getElementById("sector-input");
@@ -596,6 +683,7 @@ function enterWorkshopFromCover(focusInput = true) {
     }, 240);
   } else if (mainCard) {
     mainCard.style.display = "block";
+    mainCard.classList.add("is-visible");
   }
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -605,12 +693,16 @@ function showCoverBriefing() {
   const mainCard = document.getElementById("login-card-main");
   const partCard = document.getElementById("participant-card");
   sessionStorage.removeItem("cppr_cover_dismissed");
-  if (mainCard) mainCard.style.display = "none";
   if (partCard) partCard.style.display = "none";
   if (cover) {
-    cover.style.display = "block";
+    cover.style.display = "flex";
     cover.classList.add("apple-reveal");
   }
+  if (mainCard) {
+    mainCard.style.display = "block";
+    mainCard.classList.add("is-visible");
+  }
+  initAppleScrollExperience();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -789,14 +881,15 @@ function showLoginView() {
     if (coverDismissed) {
       cover.style.display = "none";
       mainCard.style.display = "block";
-      mainCard.classList.add("apple-reveal");
+      mainCard.classList.add("is-visible", "apple-reveal");
     } else {
-      cover.style.display = "block";
-      cover.classList.add("apple-reveal");
-      mainCard.style.display = "none";
+      cover.style.display = "flex";
+      mainCard.style.display = "block";
+      mainCard.classList.add("is-visible");
     }
   } else if (mainCard) {
     mainCard.style.display = "block";
+    mainCard.classList.add("is-visible");
   }
 
   if (partCard) partCard.style.display = "none";
@@ -814,6 +907,7 @@ function showLoginView() {
   }
   renderRecentParticipantsList();
   updateLoginPillsLockState();
+  initAppleScrollExperience();
 }
 
 function logoutSector() {
