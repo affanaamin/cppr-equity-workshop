@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261123-perfect">
+  <link rel="stylesheet" href="style.css?v=20261124-universal">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
 </head>
 <body>
@@ -113,38 +113,47 @@
             </div>
 
             <div class="apple-dims-showcase">
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card is-selected apple-scene-child" data-dim-idx="0" role="button" tabindex="0" aria-pressed="true" onclick="selectAppleDimension(0)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(0);}">
                 <span class="apple-dim-icon">♀️</span>
                 <div><strong>1. Gender</strong><span>Sex-disaggregated targets &amp; data</span></div>
               </div>
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card apple-scene-child" data-dim-idx="1" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(1);}">
                 <span class="apple-dim-icon">♿</span>
                 <div><strong>2. Disability</strong><span>Accessibility &amp; DPO consultation</span></div>
               </div>
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card apple-scene-child" data-dim-idx="2" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(2)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(2);}">
                 <span class="apple-dim-icon">⛺</span>
                 <div><strong>3. Refugee / Displacement</strong><span>Afghan refugee &amp; IDP inclusion</span></div>
               </div>
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card apple-scene-child" data-dim-idx="3" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(3)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(3);}">
                 <span class="apple-dim-icon">🗣️</span>
                 <div><strong>4. Ethnicity</strong><span>Group-level data &amp; targets</span></div>
               </div>
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card apple-scene-child" data-dim-idx="4" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(4)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(4);}">
                 <span class="apple-dim-icon">🕊️</span>
                 <div><strong>5. Religious Minority</strong><span>Explicit non-Muslim provisions</span></div>
               </div>
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card apple-scene-child" data-dim-idx="5" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(5)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(5);}">
                 <span class="apple-dim-icon">📉</span>
                 <div><strong>6. Low-Income</strong><span>Targeted household allocations</span></div>
               </div>
-              <div class="apple-dim-card apple-scene-child">
+              <div class="apple-dim-card apple-scene-child" data-dim-idx="6" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(6)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(6);}">
                 <span class="apple-dim-icon">👶</span>
                 <div><strong>7. Age</strong><span>Children, youth &amp; elderly care</span></div>
               </div>
-              <div class="apple-dim-card is-cross-cutting apple-scene-child">
+              <div class="apple-dim-card is-cross-cutting apple-scene-child" data-dim-idx="7" role="button" tabindex="0" aria-pressed="false" onclick="selectAppleDimension(7)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAppleDimension(7);}">
                 <span class="apple-dim-icon">🗺️</span>
                 <div><strong>+ Geographic Vulnerability</strong><span>Cross-cutting: Bajaur, Orakzai &amp; remote tehsils</span></div>
               </div>
+            </div>
+
+            <div id="apple-dim-detail-bar" class="apple-dim-detail-bar apple-scene-child" aria-live="polite">
+              <div class="apple-dim-detail-head">
+                <span class="apple-dim-detail-badge">LENS 1 OF 7 · TAP ANY DIMENSION ABOVE TO INSPECT</span>
+                <strong>♀️ Gender Equality &amp; Inclusion</strong>
+              </div>
+              <p class="apple-dim-detail-body"><strong>What to look for:</strong> Targets, data, and stakeholder consultation disaggregated by sex—not a single headcount. <strong>KP Finding:</strong> Gender is the only dimension consistently recognised in KP’s education cycle, yet 59% of out-of-school children are girls.</p>
+              <div class="apple-dim-detail-prompt">💬 Room Prompt: Where does your budget quote a gender figure without disaggregated execution or outcome tracking?</div>
             </div>
 
             <div class="apple-cycle-strip apple-scene-child">
@@ -163,9 +172,18 @@
           <!-- SCENE 3: LINE ITEM 402 RED-TO-GREEN CASE STUDY -->
           <section id="apple-scene-3" class="apple-scene" data-scene="3">
             <div class="apple-stage-header apple-scene-child">
-              <span class="apple-stage-eyebrow">03 · THE 6-STEP METHOD IN ACTION</span>
+              <span class="apple-stage-eyebrow">03 · THE 6-STEP METHOD &amp; GUARDRAILS</span>
               <h2 class="apple-stage-title">From blind allocation to genuine equity.</h2>
-              <p class="apple-stage-sub">Illustrative Audit · Budget Line Item 402 across the 6-Step Equity Method.</p>
+              <p class="apple-stage-sub">Illustrative Audit · Budget Line Item 402 across the 6-Step Equity Audit Method.</p>
+            </div>
+
+            <div class="apple-six-step-strip apple-scene-child">
+              <div class="apple-step-pill"><span>01</span>Read Surface</div>
+              <div class="apple-step-pill"><span>02</span>7-Dim Filter</div>
+              <div class="apple-step-pill"><span>03</span>Geo Overlay</div>
+              <div class="apple-step-pill"><span>04</span>Execution Reality</div>
+              <div class="apple-step-pill"><span>05</span>Red / Yellow / Green</div>
+              <div class="apple-step-pill is-highlight"><span>06</span>Equity Rewrite</div>
             </div>
 
             <div class="apple-transform-grid">
@@ -186,6 +204,18 @@
               <div class="apple-traffic-pill green"><strong>🟢 YES (Green)</strong><span>Explicit objective + disaggregated data + funded &amp; monitored to outcome.</span></div>
               <div class="apple-traffic-pill yellow"><strong>🟡 PARTIAL (Yellow)</strong><span>Acknowledged in general terms but lacks disaggregation or outcome tracking.</span></div>
               <div class="apple-traffic-pill red"><strong>🔴 NO (Red)</strong><span>Absent — no explicit objective, disaggregated data, consultation, or monitoring.</span></div>
+            </div>
+
+            <div class="apple-misconceptions-strip apple-scene-child">
+              <div class="apple-misconceptions-row">
+                <span class="apple-guardrail-pill"><strong>Gap ≠ Misuse:</strong> A Red rating tracks missed design/delivery, not stolen funds</span>
+                <span class="apple-guardrail-pill"><strong>≥ 2 Sources:</strong> Cross-reference Budget Book + ADP / Policy docs</span>
+                <span class="apple-guardrail-pill"><strong>System Lens:</strong> Asks who the budget reaches—not blaming officials</span>
+              </div>
+              <div class="apple-toc-chain">
+                <span>Theory of Change:</span>
+                <strong>Evidence</strong> → <strong>Capability</strong> → <strong>Demand</strong> → <strong>Institutionalisation</strong>
+              </div>
             </div>
           </section>
         </div>
@@ -341,6 +371,25 @@
 
       <!-- TAB 1: 14 EVALUATION CARDS -->
       <section id="tab-cards">
+        <!-- Live Traffic-Light Equity Synthesis & Budget Stage Filter Bar -->
+        <div id="equity-synthesis-bar" class="equity-synthesis-bar">
+          <div class="traffic-tally-group" aria-label="Traffic-light ratings tally">
+            <span class="traffic-tally-pill green">🟢 YES: <strong id="tally-yes">0</strong></span>
+            <span class="traffic-tally-pill yellow">🟡 PARTIAL: <strong id="tally-partial">0</strong></span>
+            <span class="traffic-tally-pill red">🔴 NO: <strong id="tally-no">0</strong></span>
+            <span class="traffic-tally-pill neutral">⚪ Unrated: <strong id="tally-unrated">14</strong></span>
+          </div>
+          <div id="stage-filter-bar" class="stage-filter-bar" role="group" aria-label="Filter indicators by budget stage">
+            <button type="button" class="stage-filter-btn active" data-stage-filter="all" onclick="filterWorksheetCards('all')">All (14)</button>
+            <button type="button" class="stage-filter-btn" data-stage-filter="planning" onclick="filterWorksheetCards('planning')">1. Planning</button>
+            <button type="button" class="stage-filter-btn" data-stage-filter="formulation" onclick="filterWorksheetCards('formulation')">2. Formulation</button>
+            <button type="button" class="stage-filter-btn" data-stage-filter="execution" onclick="filterWorksheetCards('execution')">3. Execution</button>
+            <button type="button" class="stage-filter-btn" data-stage-filter="monitoring" onclick="filterWorksheetCards('monitoring')">4. M&amp;E / Audit</button>
+            <button type="button" class="stage-filter-btn" data-stage-filter="outcomes" onclick="filterWorksheetCards('outcomes')">5. Outcomes</button>
+            <button type="button" class="stage-filter-btn" data-stage-filter="incomplete" onclick="filterWorksheetCards('incomplete')">Incomplete</button>
+          </div>
+        </div>
+
         <!-- Quick Jump Navigation Bar -->
         <div class="quick-jump-bar" id="quick-jump-container">
           <!-- Dynamically populated with pills: A5, B1, B2... -->
@@ -524,7 +573,7 @@
   <div id="toast" class="toast-notice">Notice</div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="app.js?v=20261123-perfect"></script>
+  <script src="app.js?v=20261124-universal"></script>
   <script>
     // Fallback if cached app.js exists
     window.addEventListener('error', function(e) {

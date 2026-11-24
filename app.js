@@ -586,6 +586,87 @@ const APPLE_SCENE_WINDOWS = [
   { enterStart: 0.82, enterEnd: 0.90, exitStart: 0.96, exitEnd: 1.00, holdP: 0.93 }
 ];
 
+const APPLE_DIMENSION_DETAILS = [
+  {
+    badge: "LENS 1 OF 7 · GENDER",
+    title: "♀️ Gender Equality & Inclusion",
+    lookFor: "Targets, data, and stakeholder consultation disaggregated by sex—not a single headcount of beneficiaries.",
+    finding: "Gender is the only dimension consistently recognised in KP’s education cycle, yet 59% of out-of-school children are girls and 53% of dropouts are female.",
+    prompt: "Where does your budget quote a gender figure without disaggregated execution or outcome tracking?"
+  },
+  {
+    badge: "LENS 2 OF 7 · DISABILITY",
+    title: "♿ Disability & Accessibility",
+    lookFor: "Physical accessibility mandates (ramps, accessible toilets), disaggregated data, and consultation with disabled persons' organisations (DPOs).",
+    finding: "In Phase I, KP's Disability Rehabilitation Fund allocations remained unspent—approved in planning, never delivered in practice.",
+    prompt: "In your own council or department, whose accessibility need is assumed rather than explicitly checked?"
+  },
+  {
+    badge: "LENS 3 OF 7 · DISPLACEMENT",
+    title: "⛺ Refugee & Displacement Status",
+    lookFor: "Explicit inclusion of Afghan refugee and internally displaced populations in sectoral targets, enrolment drives, and public services.",
+    finding: "IMSciences' Urban Refugee Needs Assessment found Afghan refugee children in KP face especially low enrolment and high dropout.",
+    prompt: "Which displaced households in your catchment area rely on local services without appearing in budget targets?"
+  },
+  {
+    badge: "LENS 4 OF 7 · ETHNICITY",
+    title: "🗣️ Ethnicity & Linguistic Groups",
+    lookFor: "Service data and targets broken down by ethnic or linguistic community where relevant to equal access.",
+    finding: "KP's current planning documents carry no equity appraisal for ethnicity at all—leaving minority-language needs invisible.",
+    prompt: "In your council area, which ethnic or linguistic group do the annual scheme lists never name?"
+  },
+  {
+    badge: "LENS 5 OF 7 · RELIGIOUS MINORITY",
+    title: "🕊️ Religious Minority Safeguards",
+    lookFor: "Explicit constitutional protection (Article 36) and dedicated provisions for non-Muslim citizens, not folded into general totals.",
+    finding: "Treating religion as automatically covered by ethnicity or general population totals hides barriers to minority access.",
+    prompt: "Does any budget line verify fair access and representation for religious minority communities?"
+  },
+  {
+    badge: "LENS 6 OF 7 · LOW-INCOME",
+    title: "📉 Low-Income & Poor Households",
+    lookFor: "Explicit subsidies, fee waivers, or targeted household lines—not assuming general economic growth will reach the poorest.",
+    finding: "Budgets that assume aggregate growth benefits everyone allow extreme poverty and fee barriers to exclude low-income families.",
+    prompt: "Which user fee, transport cost, or co-payment quietly locks out low-income households in your sector?"
+  },
+  {
+    badge: "LENS 7 OF 7 · AGE",
+    title: "👶 Age (Children, Youth & Elderly)",
+    lookFor: "Distinct service provisions calibrated for early childhood, adolescents, youth skills, and elderly care.",
+    finding: "Constitutional Article 25A mandates free education for ages 5–16, yet 4.9M children in KP remain out of school.",
+    prompt: "Where do generic allocations miss age-specific needs across early childhood, youth, or senior citizens?"
+  },
+  {
+    badge: "CROSS-CUTTING OVERLAY · GEOGRAPHY",
+    title: "🗺️ Geographic Vulnerability (NMDs & Remote Tehsils)",
+    lookFor: "Remote, mountainous, underserved, or Newly Merged Districts (NMDs) named and resourced separately from urban centres.",
+    finding: "Bajaur and Orakzai carry no equity appraisal for geographic isolation; Local Gov rules now demand pictorial execution proof from far-flung areas.",
+    prompt: "Tracked across all 7 dimensions above—which remote tehsil loses out to urban-centre capital bias?"
+  }
+];
+
+function selectAppleDimension(idx) {
+  const item = APPLE_DIMENSION_DETAILS[idx];
+  const detailBar = document.getElementById("apple-dim-detail-bar");
+  if (!item || !detailBar) return;
+
+  document.querySelectorAll(".apple-dim-card").forEach((card) => {
+    const cIdx = parseInt(card.getAttribute("data-dim-idx"), 10);
+    const active = cIdx === idx;
+    card.classList.toggle("is-selected", active);
+    card.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+
+  detailBar.innerHTML = `
+    <div class="apple-dim-detail-head">
+      <span class="apple-dim-detail-badge">${escapeHtml(item.badge)}</span>
+      <strong>${escapeHtml(item.title)}</strong>
+    </div>
+    <p class="apple-dim-detail-body"><strong>What to look for:</strong> ${escapeHtml(item.lookFor)} <strong>KP Finding:</strong> ${escapeHtml(item.finding)}</p>
+    <div class="apple-dim-detail-prompt">💬 Room Prompt: ${escapeHtml(item.prompt)}</div>
+  `;
+}
+
 function animateCountUp(statEl) {
   if (!statEl || statEl.dataset.counted === "1") return;
   const target = parseFloat(statEl.dataset.countTarget);
@@ -650,6 +731,9 @@ function updateAppleCinemaScroll() {
   }
 
   const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const activeTag = document.activeElement && document.activeElement.tagName;
+  const isTypingInInput = activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT";
+  const isCompactFlow = (window.innerWidth <= 768) || (!isTypingInInput && window.innerHeight <= 640);
   const scrollBar = document.getElementById("apple-scroll-bar");
   const docHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
   if (scrollBar) {
@@ -664,98 +748,148 @@ function updateAppleCinemaScroll() {
   let activeDotIdx = 0;
   let bestAlpha = -1;
 
-  scenes.forEach((scene, idx) => {
-    const win = APPLE_SCENE_WINDOWS[idx];
-    if (!win) return;
+  if (isCompactFlow) {
+    let closestDist = Infinity;
+    const viewMid = window.innerHeight * 0.48;
+    scenes.forEach((scene, idx) => {
+      if (reducedMotion) {
+        scene.style.opacity = "1";
+        scene.style.transform = "none";
+        scene.style.filter = "none";
+        scene.style.pointerEvents = "auto";
+        scene.querySelectorAll(".apple-scene-child").forEach(child => {
+          child.style.opacity = "1";
+          child.style.transform = "none";
+        });
+        return;
+      }
 
-    if (reducedMotion) {
-      scene.style.opacity = "1";
-      scene.style.transform = "none";
+      const sRect = scene.getBoundingClientRect();
+      const sMid = sRect.top + sRect.height * 0.5;
+      const dist = Math.abs(sMid - viewMid);
+      if (dist < closestDist) {
+        closestDist = dist;
+        activeDotIdx = idx;
+      }
+
+      const enterRatio = clamp01((window.innerHeight * 0.94 - sRect.top) / Math.max(window.innerHeight * 0.35, 1));
+      const exitRatio = sRect.bottom < window.innerHeight * 0.14
+        ? clamp01(sRect.bottom / Math.max(window.innerHeight * 0.14, 1))
+        : 1;
+      const alpha = idx === 0
+        ? Math.max(0.35, exitRatio)
+        : Math.max(0.28, Math.min(easeOutCubic(enterRatio), exitRatio));
+      const yShift = idx === 0 ? 0 : (1 - easeOutCubic(enterRatio)) * 20;
+
+      scene.style.opacity = alpha.toFixed(3);
+      scene.style.transform = `translate3d(0, ${yShift.toFixed(1)}px, 0) scale(${(0.97 + 0.03 * alpha).toFixed(4)})`;
       scene.style.filter = "none";
       scene.style.pointerEvents = "auto";
+      scene.classList.toggle("is-active-scene", alpha > 0.6);
+
       scene.querySelectorAll(".apple-scene-child").forEach(child => {
         child.style.opacity = "1";
         child.style.transform = "none";
       });
-      return;
-    }
 
-    let alpha = 1;
-    let scale = 1;
-    let translateY = 0;
-    let blur = 0;
-
-    if (win.enterStart >= 0 && p <= win.enterStart) {
-      alpha = 0;
-      scale = 0.88;
-      translateY = 48;
-      blur = 10;
-    } else if (win.enterStart >= 0 && p < win.enterEnd) {
-      const t = easeOutCubic(clamp01((p - win.enterStart) / Math.max(win.enterEnd - win.enterStart, 0.001)));
-      alpha = t;
-      scale = 0.88 + 0.12 * t;
-      translateY = 48 * (1 - t);
-      blur = 10 * (1 - t);
-    } else if (p >= win.exitEnd) {
-      alpha = 0;
-      scale = 1.12;
-      translateY = -48;
-      blur = 10;
-    } else if (p > win.exitStart) {
-      const t = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
-      alpha = 1 - t;
-      scale = 1 + 0.12 * t;
-      translateY = -48 * t;
-      blur = 10 * t;
-    }
-
-    scene.style.opacity = alpha.toFixed(3);
-    scene.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
-    scene.style.filter = blur > 0.15 ? `blur(${blur.toFixed(1)}px)` : "none";
-    scene.style.pointerEvents = alpha > 0.35 ? "auto" : "none";
-    scene.classList.toggle("is-active-scene", alpha > 0.35);
-
-    if (alpha > bestAlpha) {
-      bestAlpha = alpha;
-      activeDotIdx = idx;
-    }
-
-    // Stagger individual cards continuously across enter, hold, and exit phases
-    const children = scene.querySelectorAll(".apple-scene-child");
-    children.forEach((child, cIdx) => {
-      const staggerShift = (cIdx % 5) * 0.007;
-      if (win.enterStart >= 0 && p <= win.enterStart) {
-        child.style.opacity = "0";
-        child.style.transform = "translate3d(0, 22px, 0) scale(0.95)";
-      } else if (win.enterStart >= 0 && p < win.enterEnd + staggerShift) {
-        const startOffset = win.enterStart + staggerShift * 0.5;
-        const span = Math.max((win.enterEnd + staggerShift) - startOffset, 0.001);
-        const ct = easeOutCubic(clamp01((p - startOffset) / span));
-        child.style.opacity = ct.toFixed(3);
-        child.style.transform = `translate3d(0, ${(22 * (1 - ct)).toFixed(1)}px, 0) scale(${(0.95 + 0.05 * ct).toFixed(4)})`;
-      } else if (p >= win.exitEnd) {
-        child.style.opacity = "0";
-        child.style.transform = "translate3d(0, -18px, 0) scale(0.98)";
-      } else if (p > win.exitStart) {
-        const ct = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
-        child.style.opacity = (1 - ct).toFixed(3);
-        child.style.transform = `translate3d(0, ${(-18 * ct).toFixed(1)}px, 0) scale(${(1 - 0.02 * ct).toFixed(4)})`;
-      } else {
-        child.style.opacity = "1";
-        child.style.transform = "translate3d(0, 0px, 0) scale(1)";
+      if (idx === 1 && alpha > 0.45) {
+        scene.querySelectorAll("[data-count-target]").forEach(animateCountUp);
       }
     });
+  } else {
+    scenes.forEach((scene, idx) => {
+      const win = APPLE_SCENE_WINDOWS[idx];
+      if (!win) return;
 
-    // Re-trigger count-up numbers when Scene 1 appears and reset if scrolled away to 0
-    if (idx === 1) {
-      const stats = scene.querySelectorAll("[data-count-target]");
-      if (alpha > 0.4) {
-        stats.forEach(animateCountUp);
-      } else if (alpha === 0 && p < win.enterStart) {
-        stats.forEach(s => { s.dataset.counted = "0"; });
+      if (reducedMotion) {
+        scene.style.opacity = "1";
+        scene.style.transform = "none";
+        scene.style.filter = "none";
+        scene.style.pointerEvents = "auto";
+        scene.querySelectorAll(".apple-scene-child").forEach(child => {
+          child.style.opacity = "1";
+          child.style.transform = "none";
+        });
+        return;
       }
-    }
-  });
+
+      let alpha = 1;
+      let scale = 1;
+      let translateY = 0;
+      let blur = 0;
+
+      if (win.enterStart >= 0 && p <= win.enterStart) {
+        alpha = 0;
+        scale = 0.88;
+        translateY = 48;
+        blur = 10;
+      } else if (win.enterStart >= 0 && p < win.enterEnd) {
+        const t = easeOutCubic(clamp01((p - win.enterStart) / Math.max(win.enterEnd - win.enterStart, 0.001)));
+        alpha = t;
+        scale = 0.88 + 0.12 * t;
+        translateY = 48 * (1 - t);
+        blur = 10 * (1 - t);
+      } else if (p >= win.exitEnd) {
+        alpha = 0;
+        scale = 1.12;
+        translateY = -48;
+        blur = 10;
+      } else if (p > win.exitStart) {
+        const t = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
+        alpha = 1 - t;
+        scale = 1 + 0.12 * t;
+        translateY = -48 * t;
+        blur = 10 * t;
+      }
+
+      scene.style.opacity = alpha.toFixed(3);
+      scene.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
+      scene.style.filter = blur > 0.15 ? `blur(${blur.toFixed(1)}px)` : "none";
+      scene.style.pointerEvents = alpha > 0.35 ? "auto" : "none";
+      scene.classList.toggle("is-active-scene", alpha > 0.35);
+
+      if (alpha > bestAlpha) {
+        bestAlpha = alpha;
+        activeDotIdx = idx;
+      }
+
+      // Stagger individual cards continuously across enter, hold, and exit phases
+      const children = scene.querySelectorAll(".apple-scene-child");
+      children.forEach((child, cIdx) => {
+        const staggerShift = (cIdx % 5) * 0.007;
+        if (win.enterStart >= 0 && p <= win.enterStart) {
+          child.style.opacity = "0";
+          child.style.transform = "translate3d(0, 22px, 0) scale(0.95)";
+        } else if (win.enterStart >= 0 && p < win.enterEnd + staggerShift) {
+          const startOffset = win.enterStart + staggerShift * 0.5;
+          const span = Math.max((win.enterEnd + staggerShift) - startOffset, 0.001);
+          const ct = easeOutCubic(clamp01((p - startOffset) / span));
+          child.style.opacity = ct.toFixed(3);
+          child.style.transform = `translate3d(0, ${(22 * (1 - ct)).toFixed(1)}px, 0) scale(${(0.95 + 0.05 * ct).toFixed(4)})`;
+        } else if (p >= win.exitEnd) {
+          child.style.opacity = "0";
+          child.style.transform = "translate3d(0, -18px, 0) scale(0.98)";
+        } else if (p > win.exitStart) {
+          const ct = easeInCubic(clamp01((p - win.exitStart) / Math.max(win.exitEnd - win.exitStart, 0.001)));
+          child.style.opacity = (1 - ct).toFixed(3);
+          child.style.transform = `translate3d(0, ${(-18 * ct).toFixed(1)}px, 0) scale(${(1 - 0.02 * ct).toFixed(4)})`;
+        } else {
+          child.style.opacity = "1";
+          child.style.transform = "translate3d(0, 0px, 0) scale(1)";
+        }
+      });
+
+      // Re-trigger count-up numbers when Scene 1 appears and reset if scrolled away to 0
+      if (idx === 1) {
+        const stats = scene.querySelectorAll("[data-count-target]");
+        if (alpha > 0.4) {
+          stats.forEach(animateCountUp);
+        } else if (alpha === 0 && p < win.enterStart) {
+          stats.forEach(s => { s.dataset.counted = "0"; });
+        }
+      }
+    });
+  }
 
   // Animate ambient orbs softly across the journey
   const stickyEl = document.getElementById("apple-cinema-sticky");
@@ -768,10 +902,10 @@ function updateAppleCinemaScroll() {
     const lRect = launchStage.getBoundingClientRect();
     const enterRatio = clamp01((window.innerHeight - lRect.top) / Math.max(window.innerHeight * 0.45, 1));
     const lt = easeOutCubic(enterRatio);
-    const lAlpha = 0.15 + 0.85 * lt;
+    const lAlpha = isCompactFlow ? (0.4 + 0.6 * lt) : (0.15 + 0.85 * lt);
     const lScale = 0.94 + 0.06 * lt;
-    const lY = 32 * (1 - lt);
-    const lBlur = 6 * (1 - lt);
+    const lY = (isCompactFlow ? 18 : 32) * (1 - lt);
+    const lBlur = isCompactFlow ? 0 : 6 * (1 - lt);
     const applyLaunchStyle = (el) => {
       el.style.opacity = lAlpha.toFixed(3);
       el.style.transform = `translate3d(0, ${lY.toFixed(1)}px, 0) scale(${lScale.toFixed(4)})`;
@@ -803,6 +937,7 @@ function initAppleScrollExperience() {
     appleCinemaListenersBound = true;
     window.addEventListener("scroll", scheduleAppleCinemaUpdate, { passive: true });
     window.addEventListener("resize", scheduleAppleCinemaUpdate, { passive: true });
+    window.addEventListener("orientationchange", scheduleAppleCinemaUpdate, { passive: true });
   }
 }
 
@@ -811,6 +946,14 @@ function scrollToAppleScene(sceneIdx) {
     const launchpad = document.getElementById("apple-launchpad-stage") || document.getElementById("login-card-main");
     if (launchpad) launchpad.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
+  }
+  const isCompactFlow = (window.innerWidth <= 768) || (window.innerHeight <= 640);
+  if (isCompactFlow) {
+    const targetScene = document.getElementById(`apple-scene-${sceneIdx}`);
+    if (targetScene) {
+      targetScene.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
   }
   const track = document.getElementById("apple-cinema-track");
   const win = APPLE_SCENE_WINDOWS[sceneIdx];
@@ -1211,6 +1354,7 @@ async function openSector(secKey) {
   document.getElementById("table-num").value = currentResponses.table_number || "";
 
   // Render sub-components
+  currentStageFilter = "all";
   renderQuickJumpBar(secInfo.cards);
   renderCards(secInfo);
   renderCatalog(secInfo.catalog);
@@ -1218,6 +1362,7 @@ async function openSector(secKey) {
   renderRubric(secInfo.rubric);
 
   applyWorksheetLockState(secKey);
+  filterWorksheetCards("all");
   updateProgress();
   switchTab("cards");
 }
@@ -1380,6 +1525,75 @@ function renderQuickJumpBar(cards) {
   });
 }
 
+let currentStageFilter = "all";
+
+function getStageGroupForCard(card) {
+  const idPrefix = (card && card.id ? card.id[0] : "").toUpperCase();
+  if (idPrefix === "A") return "planning";
+  if (idPrefix === "B") return "formulation";
+  if (idPrefix === "C") return "execution";
+  if (idPrefix === "D") return "monitoring";
+  if (idPrefix === "E") return "outcomes";
+  return "other";
+}
+
+function getCardChecklistState(ans) {
+  const a = ans || {};
+  const hasPdf = Boolean(a.pdf_searched && a.pdf_searched.trim());
+  const hasPage = Boolean((a.book_page && a.book_page.trim()) || (a.pdf_page && a.pdf_page.trim()) || (a.page_ref && a.page_ref.trim()));
+  const hasEvidence = Boolean(a.evidence && a.evidence.trim());
+  const hasDims = Array.isArray(a.dimensions) && a.dimensions.length > 0;
+  const hasVerdict = Boolean((a.status && a.status.trim()) && (a.rationale && a.rationale.trim()));
+  return { hasPdf, hasPage, hasEvidence, hasDims, hasVerdict };
+}
+
+function renderCardChecklistHtml(ans) {
+  const s = getCardChecklistState(ans);
+  return `
+    <span class="ebt-check-item ${s.hasPdf ? 'done' : ''}">${s.hasPdf ? '✓' : '○'} 1. Source PDF</span>
+    <span class="ebt-check-item ${s.hasPage ? 'done' : ''}">${s.hasPage ? '✓' : '○'} 2. Dual Page</span>
+    <span class="ebt-check-item ${s.hasEvidence ? 'done' : ''}">${s.hasEvidence ? '✓' : '○'} 3. Evidence</span>
+    <span class="ebt-check-item ${s.hasDims ? 'done' : ''}">${s.hasDims ? '✓' : '○'} 4. Dimensions</span>
+    <span class="ebt-check-item ${s.hasVerdict ? 'done' : ''}">${s.hasVerdict ? '✓' : '○'} 5. Rating &amp; Rationale</span>
+  `;
+}
+
+function updateCardChecklistUI(cid) {
+  const el = document.getElementById(`checklist-${cid}`);
+  if (!el) return;
+  el.innerHTML = renderCardChecklistHtml(currentResponses.answers[cid]);
+}
+
+function filterWorksheetCards(filterKey) {
+  currentStageFilter = filterKey || "all";
+  document.querySelectorAll(".stage-filter-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-stage-filter") === currentStageFilter);
+  });
+  applyWorksheetCardFilter();
+}
+
+function applyWorksheetCardFilter() {
+  if (!appData || !currentSector) return;
+  const cards = appData.sectors[currentSector].cards;
+  cards.forEach(c => {
+    const cardEl = document.getElementById(`card-${c.id}`);
+    const pillEl = document.getElementById(`jump-pill-${c.id}`);
+    if (!cardEl) return;
+    const stageGroup = cardEl.getAttribute("data-stage-group") || getStageGroupForCard(c);
+    const ans = currentResponses.answers[c.id];
+    const done = isCardAnswered(ans);
+
+    let visible = true;
+    if (currentStageFilter === "incomplete") {
+      visible = !done;
+    } else if (currentStageFilter !== "all") {
+      visible = stageGroup === currentStageFilter;
+    }
+    cardEl.style.display = visible ? "" : "none";
+    if (pillEl) pillEl.classList.toggle("filtered-out", !visible);
+  });
+}
+
 // Render 14 Indicator Cards
 function renderCards(secInfo) {
   const container = document.getElementById("cards-container");
@@ -1389,6 +1603,7 @@ function renderCards(secInfo) {
 
   secInfo.cards.forEach((card, idx) => {
     const cid = card.id;
+    const stageGroup = getStageGroupForCard(card);
     const ans = currentResponses.answers[cid] || {
       pdf_searched: "",
       book_page: "",
@@ -1406,6 +1621,7 @@ function renderCards(secInfo) {
     const cardDiv = document.createElement("div");
     cardDiv.className = isComplete ? "indicator-card card-completed" : "indicator-card";
     cardDiv.id = `card-${cid}`;
+    cardDiv.setAttribute("data-stage-group", stageGroup);
 
     cardDiv.innerHTML = `
       <div class="card-header">
@@ -1420,6 +1636,10 @@ function renderCards(secInfo) {
           <span class="sources-label">Prescribed Source Documents:</span>
           <span>${escapeHtml(card.prescribed_sources)}</span>
         </div>
+      </div>
+
+      <div class="ebt-card-checklist" id="checklist-${cid}">
+        ${renderCardChecklistHtml(ans)}
       </div>
 
       <div class="card-body">
@@ -1650,6 +1870,7 @@ function checkCardCompletion(cid) {
     cardEl.classList.toggle("card-completed", isDone);
   }
 
+  updateCardChecklistUI(cid);
   updateProgress();
 }
 
@@ -1657,21 +1878,51 @@ function updateProgress() {
   if (!appData || !currentSector) return;
   const cards = appData.sectors[currentSector].cards;
   let doneCount = 0;
+  let yesCount = 0;
+  let partialCount = 0;
+  let noCount = 0;
+  let unratedCount = 0;
 
   cards.forEach(c => {
     const a = currentResponses.answers[c.id];
     const done = isCardAnswered(a);
     if (done) doneCount++;
+
+    const st = a && a.status ? a.status.toUpperCase() : "";
+    if (st === "YES") yesCount++;
+    else if (st === "PARTIAL") partialCount++;
+    else if (st === "NO") noCount++;
+    else unratedCount++;
+
     const pillEl = document.getElementById(`jump-pill-${c.id}`);
-    if (pillEl) pillEl.classList.toggle("completed", done);
+    if (pillEl) {
+      pillEl.classList.toggle("completed", done);
+      pillEl.classList.toggle("status-yes", st === "YES");
+      pillEl.classList.toggle("status-partial", st === "PARTIAL");
+      pillEl.classList.toggle("status-no", st === "NO");
+    }
     const cardEl = document.getElementById(`card-${c.id}`);
     if (cardEl) cardEl.classList.toggle("card-completed", done);
   });
 
+  const yesEl = document.getElementById("tally-yes");
+  const partialEl = document.getElementById("tally-partial");
+  const noEl = document.getElementById("tally-no");
+  const unratedEl = document.getElementById("tally-unrated");
+  if (yesEl) yesEl.textContent = String(yesCount);
+  if (partialEl) partialEl.textContent = String(partialCount);
+  if (noEl) noEl.textContent = String(noCount);
+  if (unratedEl) unratedEl.textContent = String(unratedCount);
+
+  applyWorksheetCardFilter();
+
   const pct = Math.round((doneCount / cards.length) * 100);
-  document.getElementById("progress-bar").style.width = `${pct}%`;
-  document.getElementById("progress-text").textContent = `${doneCount} / ${cards.length} Completed (${pct}%)`;
-  document.getElementById("footer-summary-text").textContent = `${doneCount} / ${cards.length} Completed`;
+  const progBar = document.getElementById("progress-bar");
+  const progText = document.getElementById("progress-text");
+  const footerText = document.getElementById("footer-summary-text");
+  if (progBar) progBar.style.width = `${pct}%`;
+  if (progText) progText.textContent = `${doneCount} / ${cards.length} Completed (${pct}%)`;
+  if (footerText) footerText.textContent = `${doneCount} / ${cards.length} Completed`;
 }
 
 // AutoSave Mechanism

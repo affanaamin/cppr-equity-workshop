@@ -53,11 +53,12 @@ body {
 /* Login View */
 .login-wrapper {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 0.75rem 1.25rem 2.5rem;
+  padding: 0.75rem max(1rem, env(safe-area-inset-right)) 2.5rem max(1rem, env(safe-area-inset-left));
   background: radial-gradient(circle at 50% 0%, #eef4ff 0%, #f5f5f7 60%);
 }
 
@@ -1952,6 +1953,7 @@ body {
   top: 0;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1998,14 +2000,6 @@ body {
   opacity: 0;
   pointer-events: none;
   will-change: opacity, transform, filter;
-}
-
-@media (max-width: 768px) {
-  .apple-scene {
-    justify-content: flex-start;
-    overflow-y: auto;
-    padding: 5.5rem 0.75rem 2.5rem;
-  }
 }
 
 .apple-scene-dots {
@@ -2135,7 +2129,7 @@ body {
 .apple-stage-header {
   text-align: center;
   max-width: 720px;
-  margin: 0 auto 0.9rem;
+  margin: 0 auto 0.75rem;
 }
 
 .apple-stage-eyebrow {
@@ -2145,30 +2139,30 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-blue);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .apple-stage-title {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-size: clamp(1.45rem, 2.8vw, 2.15rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.12;
   color: var(--primary-navy);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.3rem;
 }
 
 .apple-stage-sub {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.42;
 }
 
 .apple-dims-showcase {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.6rem;
-  margin-bottom: 0.85rem;
+  gap: 0.55rem;
+  margin-bottom: 0.6rem;
 }
 
 @media (max-width: 900px) {
@@ -2185,14 +2179,27 @@ body {
 
 .apple-dim-card {
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: 0.95rem;
-  padding: 0.7rem 0.85rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.07);
+  border-radius: 0.9rem;
+  padding: 0.62rem 0.78rem;
   display: flex;
   align-items: flex-start;
-  gap: 0.6rem;
+  gap: 0.55rem;
   text-align: left;
+  cursor: pointer;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apple-dim-card:hover {
+  border-color: rgba(0, 113, 227, 0.35);
+  box-shadow: 0 6px 16px rgba(0, 113, 227, 0.08);
+}
+
+.apple-dim-card.is-selected {
+  border-color: var(--accent-blue);
+  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+  box-shadow: 0 6px 18px rgba(0, 113, 227, 0.14);
 }
 
 .apple-dim-card.is-cross-cutting {
@@ -2201,23 +2208,77 @@ body {
 }
 
 .apple-dim-icon {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   line-height: 1.2;
 }
 
 .apple-dim-card strong {
   display: block;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--primary-navy);
-  margin-bottom: 0.12rem;
+  margin-bottom: 0.1rem;
 }
 
 .apple-dim-card span {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   color: var(--text-muted);
-  line-height: 1.38;
+  line-height: 1.34;
+}
+
+/* Interactive Dimension Lens Inspector Panel (Scene 2) */
+.apple-dim-detail-bar {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 113, 227, 0.2);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: 0.95rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.6rem;
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(0, 113, 227, 0.06);
+}
+
+.apple-dim-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.apple-dim-detail-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  background: rgba(0, 113, 227, 0.09);
+  padding: 0.16rem 0.55rem;
+  border-radius: 999px;
+}
+
+.apple-dim-detail-head strong {
+  font-size: 0.88rem;
+  color: var(--primary-navy);
+}
+
+.apple-dim-detail-body {
+  font-size: 0.78rem;
+  color: var(--text-main);
+  line-height: 1.44;
+  margin-bottom: 0.32rem;
+}
+
+.apple-dim-detail-prompt {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #0369a1;
+  background: #f0f9ff;
+  border-radius: 0.5rem;
+  padding: 0.32rem 0.65rem;
 }
 
 .apple-cycle-strip {
@@ -2226,28 +2287,28 @@ body {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.45rem;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: 1.15rem;
-  padding: 0.85rem 1.15rem;
+  border-radius: 1rem;
+  padding: 0.65rem 0.95rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
 .apple-cycle-step {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+  gap: 0.35rem;
+  font-size: 0.76rem;
   font-weight: 600;
   color: var(--primary-navy);
   background: #f5f5f7;
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.7rem;
   border-radius: 999px;
 }
 
 .apple-cycle-step span {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   color: var(--accent-blue);
 }
@@ -2257,12 +2318,51 @@ body {
   font-weight: 700;
 }
 
+/* 6-Step Method Strip & Misconceptions / Theory of Change (Scene 3) */
+.apple-six-step-strip {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.apple-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  padding: 0.28rem 0.68rem;
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+}
+
+.apple-step-pill span {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+}
+
+.apple-step-pill.is-highlight {
+  background: #ecfdf5;
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #065f46;
+}
+
+.apple-step-pill.is-highlight span {
+  color: #059669;
+}
+
 .apple-transform-grid {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
-  margin-bottom: 0.8rem;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
 }
 
 @media (max-width: 760px) {
@@ -2274,13 +2374,13 @@ body {
 .apple-transform-card {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 1.1rem;
-  padding: 0.95rem 1.15rem;
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
   text-align: left;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.42rem;
 }
 
 .apple-transform-card.is-red {
@@ -2294,7 +2394,7 @@ body {
 }
 
 .apple-transform-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -2302,24 +2402,79 @@ body {
 }
 
 .apple-transform-quote {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  line-height: 1.45;
+  line-height: 1.42;
   color: var(--primary-navy);
   background: rgba(0, 0, 0, 0.03);
-  border-radius: 0.75rem;
-  padding: 0.65rem 0.85rem;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.78rem;
 }
 
 .apple-transform-diag {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  line-height: 1.44;
+  line-height: 1.4;
+}
+
+.apple-misconceptions-strip {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 0.95rem;
+  padding: 0.6rem 0.85rem;
+  margin-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  text-align: left;
+}
+
+.apple-misconceptions-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+@media (max-width: 760px) {
+  .apple-misconceptions-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.apple-guardrail-pill {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: #f5f5f7;
+  border-radius: 0.55rem;
+  padding: 0.35rem 0.6rem;
+  line-height: 1.35;
+}
+
+.apple-guardrail-pill strong {
+  color: var(--primary-navy);
+}
+
+.apple-toc-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 0.38rem;
+}
+
+.apple-toc-chain strong {
+  color: var(--accent-blue);
 }
 
 .apple-launchpad-stage {
   width: 100%;
   min-height: calc(100vh - 2rem);
+  min-height: calc(100dvh - 2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2355,6 +2510,349 @@ body {
   border-color: rgba(0, 0, 0, 0.25);
   background: #f5f5f7;
 }
+
+/* =========================================================
+   WORKSHEET EQUITY SYNTHESIS BAR, STAGE FILTER & AUDIT CHECKLIST
+   ========================================================= */
+.equity-synthesis-bar {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.traffic-tally-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.traffic-tally-pill {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.26rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.traffic-tally-pill.green {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.traffic-tally-pill.yellow {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.traffic-tally-pill.red {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.traffic-tally-pill.neutral {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.stage-filter-bar {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.15rem;
+}
+
+.stage-filter-btn {
+  flex-shrink: 0;
+  padding: 0.34rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stage-filter-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--primary-navy);
+}
+
+.stage-filter-btn.active {
+  background: var(--primary-navy);
+  border-color: var(--primary-navy);
+  color: #ffffff;
+}
+
+.jump-pill.filtered-out {
+  opacity: 0.35;
+}
+
+.jump-pill.status-yes {
+  box-shadow: inset 0 -2px 0 #10b981;
+}
+
+.jump-pill.status-partial {
+  box-shadow: inset 0 -2px 0 #f59e0b;
+}
+
+.jump-pill.status-no {
+  box-shadow: inset 0 -2px 0 #ef4444;
+}
+
+.ebt-card-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 1.35rem;
+  background: #fbfbfd;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ebt-check-item {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+}
+
+.ebt-check-item.done {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+/* =========================================================
+   UNIVERSAL MULTI-DEVICE RESPONSIVENESS (PHONES, TABLETS, COMPACT LAPTOPS)
+   ========================================================= */
+@media (max-height: 760px) and (min-width: 769px) {
+  .apple-scene {
+    padding: 3.6rem 0.9rem 0.75rem;
+  }
+
+  .apple-stage-header {
+    margin: 0 auto 0.5rem;
+  }
+
+  .apple-stage-title {
+    font-size: clamp(1.3rem, 2.5vw, 1.85rem);
+  }
+
+  .apple-stage-sub {
+    font-size: 0.82rem;
+  }
+
+  .apple-bento-card {
+    padding: 0.75rem 0.95rem;
+  }
+
+  .apple-bento-body {
+    font-size: 0.75rem;
+    line-height: 1.38;
+  }
+
+  .apple-dim-card {
+    padding: 0.5rem 0.68rem;
+  }
+
+  .apple-dim-detail-bar {
+    padding: 0.55rem 0.85rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .apple-transform-card {
+    padding: 0.7rem 0.9rem;
+  }
+
+  .apple-transform-quote {
+    font-size: 0.76rem;
+    padding: 0.45rem 0.65rem;
+  }
+}
+
+@media (max-width: 768px), (max-height: 640px), (prefers-reduced-motion: reduce) {
+  .apple-cinema-track {
+    height: auto !important;
+  }
+
+  .apple-cinema-sticky {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    padding: 0.75rem 0 1.25rem;
+  }
+
+  .apple-scene {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1;
+    pointer-events: auto !important;
+    padding: 1.2rem 0.25rem !important;
+    width: 100%;
+    filter: none !important;
+  }
+
+  .apple-ambient-orb {
+    display: none;
+  }
+
+  .apple-launchpad-stage {
+    min-height: auto;
+    padding: 1.5rem 0 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .apple-cover-nav-inner {
+    padding: 0.5rem 0.65rem;
+    gap: 0.5rem;
+  }
+
+  .apple-partner-pill {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .apple-nav-cta {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .apple-btn-primary,
+  .apple-btn-secondary,
+  .quick-pill,
+  .tab-btn,
+  .stage-filter-btn,
+  .status-option,
+  .dim-chip,
+  .btn-sm,
+  .btn-primary,
+  .btn-success {
+    min-height: 44px;
+  }
+
+  .login-input,
+  .form-select,
+  .form-input,
+  .form-textarea,
+  .table-input {
+    font-size: 16px;
+  }
+
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .dual-page-group {
+    flex-direction: column;
+  }
+
+  .card-header,
+  .card-question-box,
+  .card-body,
+  .ebt-card-checklist {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .quick-jump-bar {
+    top: 0;
+  }
+
+  .sticky-footer-bar {
+    padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
+  }
+
+  .footer-btns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 0.45rem;
+  }
+
+  .footer-btns button {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.78rem;
+    padding: 0.5rem;
+  }
+
+  .inspector-modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .inspector-modal-card {
+    max-height: 95dvh;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 1.5rem 1.1rem;
+  }
+
+  .apple-hero-title {
+    font-size: 1.72rem;
+  }
+
+  .apple-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .apple-hero-actions .apple-btn-primary,
+  .apple-hero-actions .apple-btn-secondary {
+    width: 100%;
+  }
+
+  .apple-bento-card {
+    padding: 0.9rem 1rem;
+  }
+
+  .apple-dim-detail-bar {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .traffic-tally-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .table-input {
+    width: 100%;
+    max-width: 160px;
+  }
+}
+
 
 
 
